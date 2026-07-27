@@ -1,0 +1,297 @@
+{
+  "version": 1,
+  "project": "RAMLvsGADGET",
+  "chapter": "chapter01",
+  "assets": [
+    {
+      "id": "bg_gadget_lab_night",
+      "type": "background",
+      "file": "backgrounds/bg_gadget_lab_night.webp",
+      "scenes": ["SC-01"],
+      "status": "approved",
+      "source": "generated",
+      "reference": []
+    },
+    {
+      "id": "bg_raml_command",
+      "type": "background",
+      "file": "backgrounds/bg_raml_command.webp",
+      "scenes": ["SC-03", "SC-06", "SC-09b", "SC-09c"],
+      "status": "approved",
+      "source": "generated",
+      "reference": []
+    },
+    {
+      "id": "bg_warehouse_node",
+      "type": "background",
+      "file": "backgrounds/bg_warehouse_node.webp",
+      "scenes": ["SC-05"],
+      "status": "approved",
+      "source": "generated",
+      "reference": []
+    },
+    {
+      "id": "bg_hospital_courtyard",
+      "type": "background",
+      "file": "backgrounds/bg_hospital_courtyard.webp",
+      "scenes": ["SC-07", "BT-02"],
+      "status": "approved",
+      "source": "generated",
+      "reference": []
+    },
+    {
+      "id": "bg_old_server_room",
+      "type": "background",
+      "file": "backgrounds/bg_old_server_room.webp",
+      "scenes": ["SC-08", "SC-09"],
+      "status": "approved",
+      "source": "generated",
+      "reference": []
+    },
+    {
+      "id": "node_alpha_active",
+      "type": "enemy",
+      "file": "enemies/node_alpha_active.png",
+      "scenes": ["SC-05", "BT-01"],
+      "status": "approved",
+      "source": "generated",
+      "reference": []
+    },
+    {
+      "id": "node_alpha_stopped",
+      "type": "enemy",
+      "file": "enemies/node_alpha_stopped.png",
+      "scenes": ["SC-05"],
+      "status": "approved",
+      "source": "edited_generated",
+      "reference": ["node_alpha_active"]
+    },
+    {
+      "id": "node_beta_active",
+      "type": "enemy",
+      "file": "enemies/node_beta_active.png",
+      "scenes": ["SC-07", "BT-02"],
+      "status": "approved",
+      "source": "edited_generated",
+      "reference": ["node_alpha_active"]
+    },
+    {
+      "id": "autonomy_core_active",
+      "type": "enemy",
+      "file": "enemies/autonomy_core_active.png",
+      "scenes": ["SC-08", "BT-03"],
+      "status": "approved",
+      "source": "generated",
+      "reference": []
+    },
+    {
+      "id": "autonomy_core_standby",
+      "type": "enemy",
+      "file": "enemies/autonomy_core_standby.png",
+      "scenes": ["SC-09b", "SC-09c"],
+      "status": "approved",
+      "source": "edited_generated",
+      "reference": ["autonomy_core_active"]
+    },
+    {
+      "id": "ryousan_clean",
+      "type": "enemy",
+      "file": "enemies/ryousan_clean.png",
+      "scenes": ["SC-05", "BT-01"],
+      "status": "approved",
+      "source": "edited_existing",
+      "reference": [
+        "../../raml_after_hours/assets/characters/07_ryousan.png"
+      ]
+    },
+    {
+      "id": "keisuke_robo_clean",
+      "type": "enemy",
+      "file": "enemies/keisuke_robo_clean.png",
+      "scenes": ["SC-08", "BT-03"],
+      "status": "approved",
+      "source": "edited_existing",
+      "reference": [
+        "../../raml_after_hours/assets/characters/06_keisukerobo.png"
+      ]
+    },
+    {
+      "id": "ev_riko_homecoming_01",
+      "type": "cutin",
+      "file": "cutins/ev_riko_homecoming_01.webp",
+      "scenes": ["SC-02"],
+      "status": "approved",
+      "source": "generated",
+      "reference": [
+        "../../raml_after_hours/assets/characters/03_riko.png"
+      ]
+    },
+    {
+      "id": "04_nori_tanned",
+      "type": "character",
+      "file": "characters/04_nori_tanned.png",
+      "scenes": ["SC-03", "SC-04", "SC-05", "SC-06", "SC-07", "SC-08", "SC-09", "SC-10"],
+      "status": "approved",
+      "source": "edited_existing",
+      "reference": [
+        "../../raml_after_hours/assets/characters/04_nori.png"
+      ]
+    },
+    {
+      "id": "nori_tanned_neutral",
+      "type": "expression",
+      "file": "characters/expressions/nori_tanned_neutral.png",
+      "scenes": ["SC-03", "SC-04", "SC-05", "SC-06", "SC-07", "SC-08", "SC-09", "SC-10"],
+      "status": "approved",
+      "source": "edited_existing",
+      "reference": [
+        "../../raml_after_hours/assets/characters/expressions/nori_neutral.png"
+      ]
+    },
+    {
+      "id": "nori_tanned_analysis",
+      "type": "expression",
+      "file": "characters/expressions/nori_tanned_analysis.png",
+      "scenes": ["SC-03", "SC-04", "SC-05", "SC-06", "SC-07", "SC-08", "SC-09", "SC-10"],
+      "status": "approved",
+      "source": "edited_existing",
+      "reference": [
+        "../../raml_after_hours/assets/characters/expressions/nori_analysis.png"
+      ]
+    },
+    {
+      "id": "keisuke_serious",
+      "type": "expression",
+      "file": "characters/expressions/keisuke_serious.png",
+      "scenes": ["SC-08"],
+      "status": "approved",
+      "source": "edited_existing",
+      "reference": [
+        "../../raml_after_hours/assets/characters/expressions/keisuke_neutral.png"
+      ]
+    },
+    {
+      "id": "keisuke_ears_down",
+      "type": "expression",
+      "file": "characters/expressions/keisuke_ears_down.png",
+      "scenes": ["SC-08"],
+      "status": "approved",
+      "source": "edited_existing",
+      "reference": [
+        "../../raml_after_hours/assets/characters/expressions/keisuke_concern.png"
+      ]
+    },
+    {
+      "id": "ci_keisuke_retreat_01",
+      "type": "cutin",
+      "file": "cutins/ci_keisuke_retreat_01.webp",
+      "scenes": ["SC-08"],
+      "status": "approved",
+      "source": "generated",
+      "reference": [
+        "../../raml_after_hours/assets/characters/05_keisuke.png",
+        "../../raml_after_hours/assets/characters/06_keisukerobo.png"
+      ]
+    },
+    {
+      "id": "ci_sho_shadow_01",
+      "type": "cutin",
+      "file": "cutins/ci_sho_shadow_01.webp",
+      "scenes": ["SC-10"],
+      "status": "approved",
+      "source": "generated",
+      "reference": [
+        "../../raml_after_hours/assets/characters/02_sho.png",
+        "../../raml_after_hours/assets/characters/08_magicalshojo.png"
+      ]
+    },
+    {
+      "id": "bg_riko_home_night",
+      "type": "background",
+      "file": "backgrounds/bg_riko_home_night.webp",
+      "scenes": ["SC-02"],
+      "status": "approved",
+      "source": "generated",
+      "reference": []
+    },
+    {
+      "id": "bg_cityhall_night",
+      "type": "background",
+      "file": "backgrounds/bg_cityhall_night.webp",
+      "scenes": ["SC-04", "SC-09a"],
+      "status": "approved",
+      "source": "generated",
+      "reference": []
+    },
+    {
+      "id": "bg_hospital_corridor",
+      "type": "background",
+      "file": "backgrounds/bg_hospital_corridor.webp",
+      "scenes": ["SC-07"],
+      "status": "approved",
+      "source": "generated",
+      "reference": []
+    },
+    {
+      "id": "bg_return_road_dawn",
+      "type": "background",
+      "file": "backgrounds/bg_return_road_dawn.webp",
+      "scenes": ["SC-10"],
+      "status": "approved",
+      "source": "generated",
+      "reference": []
+    },
+    {
+      "id": "ryousan_suppressed",
+      "type": "enemy",
+      "file": "enemies/ryousan_suppressed.png",
+      "scenes": ["SC-05"],
+      "status": "approved",
+      "source": "edited_existing",
+      "reference": [
+        "ryousan_clean"
+      ]
+    },
+    {
+      "id": "ci_open_clause_01",
+      "type": "cutin",
+      "file": "cutins/ci_open_clause_01.webp",
+      "scenes": ["SK-FR-07"],
+      "status": "approved",
+      "source": "generated",
+      "reference": [
+        "../../raml_after_hours/assets/characters/03_riko.png",
+        "../../raml_after_hours/assets/characters/05_keisuke.png"
+      ]
+    },
+    {
+      "id": "ev_riko_terminal_restored_01",
+      "type": "cutin",
+      "file": "cutins/ev_riko_terminal_restored_01.webp",
+      "scenes": ["SC-10"],
+      "status": "approved",
+      "source": "generated",
+      "reference": [
+        "../../raml_after_hours/assets/characters/03_riko.png"
+      ]
+    },
+    {
+      "id": "ov_node_space_01",
+      "type": "overlay",
+      "file": "overlays/ov_node_space_01.png",
+      "scenes": ["BT-01", "BT-02"],
+      "status": "approved",
+      "source": "code_generated",
+      "reference": []
+    },
+    {
+      "id": "ov_noise_glitch_01",
+      "type": "overlay",
+      "file": "overlays/ov_noise_glitch_01.png",
+      "scenes": ["SC-10"],
+      "status": "approved",
+      "source": "code_generated",
+      "reference": []
+    }
+  ]
+}

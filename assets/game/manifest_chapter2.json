@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "project": "RAMLvsGADGET",
+  "chapter": "chapter02",
+  "assets": [
+    {
+      "id": "bg_shopping_street_day",
+      "type": "background",
+      "file": "backgrounds/bg_shopping_street_day.webp",
+      "scenes": ["SC-C2-03"],
+      "status": "approved",
+      "source": "generated",
+      "reference": []
+    },
+    {
+      "id": "bg_city_crossing_dusk",
+      "type": "background",
+      "file": "backgrounds/bg_city_crossing_dusk.webp",
+      "scenes": ["SC-C2-07", "BT-C2-02"],
+      "status": "approved",
+      "source": "generated",
+      "reference": []
+    }
+  ]
+}
