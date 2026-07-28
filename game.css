@@ -525,7 +525,11 @@ button:focus-visible, select:focus-visible, input:focus-visible {
   .choice-button { grid-template-columns: 34px 1fr; min-height: 58px; }
   .battle-screen { grid-template-columns: 1fr; grid-template-rows: 30dvh auto; }
   .battle-visual { min-height: 220px; }
-  .battle-console { border-left: 0; border-top: 1px solid var(--line); padding: 15px; }
+  /* 横並びのPCではコンソール内スクロールで足りるが、縦積みのスマートフォンでは
+     ここが内部スクロールになると手順ボタンや決着ボタンへ到達できない。
+     高さ制約を外してページごとスクロールさせる */
+  .battle-console { border-left: 0; border-top: 1px solid var(--line); padding: 15px; overflow: visible; min-height: auto; }
+  .battle-screen { min-height: auto; }
   .battle-heading h1 { font-size: 24px; }
   .gauges { gap: 7px; margin: 14px 0; }
   .gauge-card { padding: 8px; }
