@@ -469,7 +469,8 @@
           gameState.params.gadget_analysis + (battleState.collateral ? "　｜　波及 " + battleState.collateral + "件" : "") +
           '　｜　<button class="link-button" id="battle-help">遊び方</button></div>' +
           offerMarkup() +
-          (battleState.pendingOffer ? "" : '<div class="command-grid">' + dialogueButtons() + battleActionButtons() + "</div>") +
+          // ログは手順ボタンより上に置く。下に置くとボタンの列に押し出されて、
+          // スマートフォンでは押した結果が画面外になる
           '<div class="battle-log" id="battle-log">' + battleState.log.map(function (item) {
             let cls = "";
             if (/^▶/.test(item)) cls = " class=\"log-act\"";
@@ -477,6 +478,7 @@
             else if (/→/.test(item) && /(完全性|制御|進行|RAML士気)/.test(item)) cls = " class=\"log-num\"";
             return "<p" + cls + ">" + escapeHTML(item) + "</p>";
           }).join("") + "</div>" +
+          (battleState.pendingOffer ? "" : '<div class="command-grid">' + dialogueButtons() + battleActionButtons() + "</div>") +
           '<div class="resolution-bar">' + resolutionButtons() + "</div>" +
         "</div>" +
       "</section>";
@@ -489,8 +491,13 @@
 
     screen.querySelectorAll("[data-action]").forEach(function (button) {
       button.addEventListener("click", function () {
+        const before = battleState.log.length;
         const result = Engine.performAction(battleDefinition, battleState, gameState.params, button.dataset.action);
         if (!result.ok) { toast(result.reason); return; }
+        // その一手で何が動いたかを、ログを見に行かなくても分かるようにする
+        result.local.log.slice(before).filter(function (item) {
+          return /→/.test(item) || new RegExp("^" + battleDefinition.target + "：").test(item);
+        }).slice(0, 2).forEach(toast);
         battleState = result.local;
         gameState.params = result.params;
         checkBattleState();
