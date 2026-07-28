@@ -366,7 +366,7 @@
       ["ゲージ4つの意味", "<strong>RAML士気</strong>＝隊の余力。0になるとその場は撤退します（物語は続きます）。<br><strong>完全性</strong>＝機械の頑丈さ。0まで下げると「物理停止」が選べます。<br><strong>制御</strong>＝掌握の度合い。100まで進めると「制御奪取」が選べます。<br><strong>進行</strong>＝相手の最適化の進み具合。100に達すると生活側に被害が出ます（敗北ではありません）。"],
       ["1ターンの流れ", "行動枠は<strong>1ターンに2つ</strong>。2つ使うと相手の手番になり、進行が+10され、防壁の再構成か割り込み処理が起きます。ターン上限を過ぎると規定の決着になります。"],
       ["手順（コマンド）の選び方", "<strong>精密停止</strong>＝完全性を大きく削る。破壊ルートの主軸ですが、相手は防壁を建て直してきます。<br><strong>構造解析</strong>＝制御を進め、GADGET解析を得る。制御ルートの主軸。<br><strong>傾聴</strong>＝相手の発信を遮らずに聞く。進行が+5進むリスクを負う代わりに自由理解と解析を得ます。<br>灰色の手順は、まだ開放条件を満たしていません（条件は手順の説明に出ます）。"],
-      ["決着のしかた", "画面下の<strong>物理停止</strong>／<strong>制御奪取</strong>が条件を満たすと押せます。章が進むと<strong>対話</strong>や<strong>抑え込み</strong>も選べるようになります。壊して止めるか、掌握して止めるか、話して止めるか——ここが、この作品の選択です。"]
+      ["決着のしかた", "<strong>完全性を0まで下げれば物理停止、制御を100まで進めれば制御奪取</strong>で、その場で決着します。<br>章が進むと<strong>対話</strong>や<strong>抑え込み</strong>も加わります。こちらは条件を満たすと画面下のボタンから選べます。<br>壊して止めるか、掌握して止めるか、話して止めるか——ここが、この作品の選択です。"]
     ];
     infoKicker.textContent = "TUTORIAL / BT-01";
     infoTitle.textContent = "はじめての対処";
@@ -535,6 +535,12 @@
     const auto = Engine.automaticOutcome(battleDefinition, battleState, gameState.params);
     if (auto) {
       completeBattle(auto);
+      return;
+    }
+    // 完全性を0にした／制御を100まで積んだ時点で決着させる（押し直しを待たせない）
+    const settled = Engine.settledResolution(battleDefinition, battleState, gameState.params);
+    if (settled) {
+      completeBattle({ resolution: settled, retreated: false, timedOut: false });
       return;
     }
     renderBattle();

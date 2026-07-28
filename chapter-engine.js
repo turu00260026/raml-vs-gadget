@@ -526,6 +526,20 @@
     return { ok: false, reason: "未登録の方式です" };
   }
 
+  // 完全性0・制御100 は「積み切った」状態なので、その場で決着とみなす。
+  // avoid（ターン経過で開く）や dialogue（聞いたうえで選ぶ）は受け身の条件なので自動確定しない
+  function settledResolution(definition, local, params) {
+    const tags = ["destroy", "control"];
+    for (let i = 0; i < tags.length; i += 1) {
+      const tag = tags[i];
+      if (!definition.resolutions.includes(tag)) continue;
+      if (tag === "destroy" && local.node_integrity > 0) continue;
+      if (tag === "control" && local.node_control < 100) continue;
+      if (canResolve(definition, local, params, tag).ok) return tag;
+    }
+    return null;
+  }
+
   function automaticOutcome(definition, local, params) {
     if (params.raml_morale <= 0) return { resolution: null, retreated: true, timedOut: false };
     if (!local.timedOut) return null;
@@ -610,6 +624,7 @@
     performDialogue: performDialogue,
     canResolve: canResolve,
     clauseUnlocked: clauseUnlocked,
+    settledResolution: settledResolution,
     automaticOutcome: automaticOutcome,
     finishBattle: finishBattle,
     applyChoice: applyChoice
