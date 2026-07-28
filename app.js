@@ -21,6 +21,7 @@
   let viewMode = "title";
   let advIndex = 0;
   let pendingLines = null;
+  let hitEffect = null;
   let currentScene = null;
   let settings = loadSettings();
 
@@ -399,15 +400,37 @@
   }
 
   function battleActionButtons() {
-    // 使える手順は章の解放段階と戦闘定義から決まる（正典スキル23種）
-    return Battles.actionIdsForBattle(battleDefinition).map(function (id) {
+    // いま押せる手順だけを並べる。条件未達のものは畳んでおく（毎回23個並ぶと選べない）
+    const usable = [];
+    const locked = [];
+    Battles.actionIdsForBattle(battleDefinition).forEach(function (id) {
       const action = Battles.actions[id];
       const availability = Engine.actionAvailable(battleDefinition, battleState, gameState.params, action);
       const name = action.user ? action.name + "（" + action.user + "）" : action.name;
-      return '<button class="command-button" data-action="' + escapeHTML(id) + '"' + (availability.ok ? "" : " disabled") +
-        ' title="' + escapeHTML(availability.reason) + '"><strong>' + escapeHTML(name) + "</strong><small>" +
-        escapeHTML(availability.ok ? action.detail : availability.reason) + "</small></button>";
-    }).join("");
+      if (availability.ok) {
+        usable.push('<button class="command-button" data-action="' + escapeHTML(id) + '"><strong>' +
+          escapeHTML(name) + "</strong><small>" + escapeHTML(action.detail) + "</small></button>");
+      } else if (availability.reason !== "敵フェイズへ移行中") {
+        locked.push('<li>' + escapeHTML(name) + "　<span>" + escapeHTML(availability.reason) + "</span></li>");
+      }
+    });
+    let markup = '<div class="command-grid">' + dialogueButtons() + usable.join("") + "</div>";
+    if (locked.length) {
+      markup += '<details class="locked-skills"><summary>まだ使えない手順　' + locked.length +
+        "件</summary><ul>" + locked.join("") + "</ul></details>";
+    }
+    return markup;
+  }
+
+  // ターン上限に達したら何が起きるかを、達する前に見せる
+  function turnLimitNotice() {
+    const left = battleDefinition.turnLimit - battleState.turn;
+    if (left > 2) return "";
+    const timeout = battleDefinition.timeout;
+    const outcome = timeout === "retreated"
+      ? "撤退（決着なし）になります"
+      : "自動的に「" + Battles.resolutionLabels[timeout] + "」で決着します（獲得なし）";
+    return '<div class="turn-warning">残り ' + Math.max(0, left + 1) + " ターン。上限に達すると" + escapeHTML(outcome) + "</div>";
   }
 
   function dialogueButtons() {
@@ -470,11 +493,11 @@
     viewMode = "battle";
     const targetPath = battleDefinition.asset ? Assets.assetPath(battleDefinition.asset) : null;
     const targetMarkup = targetPath
-      ? '<img class="target-image" src="' + escapeHTML(targetPath) + '" alt="" data-target>'
-      : '<div class="target-fallback"></div>';
+      ? '<img class="target-image' + (hitEffect ? " " + hitEffect : "") + '" src="' + escapeHTML(targetPath) + '" alt="" data-target>'
+      : '<div class="target-fallback' + (hitEffect ? " " + hitEffect : "") + '"></div>';
     screen.innerHTML =
       '<section class="battle-screen">' +
-        '<div class="battle-visual" style="--battle-art:' + backgroundStyle(battleDefinition.background) + '">' +
+        '<div class="battle-visual' + (hitEffect === "hit-big" ? " shock" : "") + '" style="--battle-art:' + backgroundStyle(battleDefinition.background) + '">' +
           targetMarkup +
           '<div class="battle-target-label"><strong>' + escapeHTML(battleDefinition.target) +
           '</strong><span>対処対象：機械／システム</span></div>' +
@@ -489,9 +512,11 @@
             gauge("制御", battleState.node_control, "") +
             gauge("進行", battleState.node_progress, "progress") +
           "</div>" +
-          '<div class="phase-strip">行動枠 ' + battleState.slotsUsed + " / 2　｜　GADGET解析 " +
-          gameState.params.gadget_analysis + (battleState.collateral ? "　｜　波及 " + battleState.collateral + "件" : "") +
+          '<div class="phase-strip">行動枠 ' + battleState.slotsUsed + " / " + Engine.slotLimit(battleState) +
+          "　｜　GADGET解析 " + gameState.params.gadget_analysis +
+          (battleState.collateral ? "　｜　波及 " + battleState.collateral + "件" : "") +
           '　｜　<button class="link-button" id="battle-help">遊び方</button></div>' +
+          turnLimitNotice() +
           patternMarkup() +
           offerMarkup() +
           // ログは手順ボタンより上に置く。下に置くとボタンの列に押し出されて、
@@ -503,11 +528,12 @@
             else if (/→/.test(item) && /(完全性|制御|進行|RAML士気)/.test(item)) cls = " class=\"log-num\"";
             return "<p" + cls + ">" + escapeHTML(item) + "</p>";
           }).join("") + "</div>" +
-          (battleState.pendingOffer ? "" : '<div class="command-grid">' + dialogueButtons() + battleActionButtons() + "</div>") +
+          (battleState.pendingOffer ? "" : battleActionButtons()) +
           '<div class="resolution-bar">' + resolutionButtons() + "</div>" +
         "</div>" +
       "</section>";
     wireImageFallbacks();
+    hitEffect = null; // 演出は一度きり
     // 直近の1手が必ず見えるようにログを末尾へ送る
     const logBox = document.getElementById("battle-log");
     if (logBox) logBox.scrollTop = logBox.scrollHeight;
@@ -517,8 +543,15 @@
     screen.querySelectorAll("[data-action]").forEach(function (button) {
       button.addEventListener("click", function () {
         const before = battleState.log.length;
+        const beforeIntegrity = battleState.node_integrity;
+        const beforeSync = battleState.syncHit;
         const result = Engine.performAction(battleDefinition, battleState, gameState.params, button.dataset.action);
         if (!result.ok) { toast(result.reason); return; }
+        // 手応えを画で返す：隙を突いた一撃は大きく、受け止められた一撃は硬く
+        const dealt = beforeIntegrity - result.local.node_integrity;
+        if (result.local.syncHit > beforeSync) hitEffect = "hit-big";
+        else if (dealt >= 12) hitEffect = "hit";
+        else if (dealt > 0) hitEffect = "guarded";
         // その一手で何が動いたかを、ログを見に行かなくても分かるようにする
         result.local.log.slice(before).filter(function (item) {
           return /→/.test(item) || new RegExp("^" + battleDefinition.target + "：").test(item);
