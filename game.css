@@ -39,7 +39,11 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 
 .app-shell {
   width: 100%;
-  min-height: 100dvh;
+  /* min-height だと中身が伸びたぶん body（overflow:hidden）の外へ出てしまい、
+     どこにもスクロールバーが立たない。画面の高さで固定し、
+     はみ出しは .screen 側で受ける */
+  height: 100vh;
+  height: 100dvh;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   padding-top: env(safe-area-inset-top);
@@ -96,7 +100,10 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 .screen {
   position: relative;
   min-height: 0;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   scrollbar-color: var(--cyan) transparent;
 }
 
