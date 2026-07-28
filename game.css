@@ -509,11 +509,12 @@ button:focus-visible, select:focus-visible, input:focus-visible {
   .icon-button { min-width: 44px; padding: 6px; }
   .title-screen { padding: 22px 18px 32px; }
   .title-screen h1 { font-size: clamp(42px, 17vw, 68px); }
-  .adv-screen { grid-template-rows: minmax(230px, 46dvh) auto; }
-  .portrait { height: min(50dvh, 430px); max-width: 62vw; }
-  .portrait.left { left: -18vw; }
-  .portrait.right { right: -18vw; }
-  .dialogue-panel { margin-top: -28px; padding: 18px; min-height: 210px; }
+  /* 上段を 1fr にして余白を絵側へ渡す。46dvh 固定だと下段が余りを吸って台詞欄が間延びする */
+  .adv-screen { grid-template-rows: minmax(230px, 1fr) auto; }
+  .portrait { height: min(46dvh, 400px); max-width: 58vw; }
+  .portrait.left { left: clamp(0px, 1vw, 14px); }
+  .portrait.right { right: clamp(0px, 1vw, 14px); }
+  .dialogue-panel { margin-top: -28px; padding: 18px; min-height: 132px; align-self: end; }
   .dialogue-text { font-size: var(--body-size); line-height: 1.72; }
   .choice-button { grid-template-columns: 34px 1fr; min-height: 58px; }
   .battle-screen { grid-template-columns: 1fr; grid-template-rows: 30dvh auto; }
