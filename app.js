@@ -470,11 +470,20 @@
           '　｜　<button class="link-button" id="battle-help">遊び方</button></div>' +
           offerMarkup() +
           (battleState.pendingOffer ? "" : '<div class="command-grid">' + dialogueButtons() + battleActionButtons() + "</div>") +
-          '<div class="battle-log">' + battleState.log.map(function (item) { return "<p>› " + escapeHTML(item) + "</p>"; }).join("") + "</div>" +
+          '<div class="battle-log" id="battle-log">' + battleState.log.map(function (item) {
+            let cls = "";
+            if (/^▶/.test(item)) cls = " class=\"log-act\"";
+            else if (/^──/.test(item)) cls = " class=\"log-turn\"";
+            else if (/→/.test(item) && /(完全性|制御|進行|RAML士気)/.test(item)) cls = " class=\"log-num\"";
+            return "<p" + cls + ">" + escapeHTML(item) + "</p>";
+          }).join("") + "</div>" +
           '<div class="resolution-bar">' + resolutionButtons() + "</div>" +
         "</div>" +
       "</section>";
     wireImageFallbacks();
+    // 直近の1手が必ず見えるようにログを末尾へ送る
+    const logBox = document.getElementById("battle-log");
+    if (logBox) logBox.scrollTop = logBox.scrollHeight;
     const helpButton = document.getElementById("battle-help");
     if (helpButton) helpButton.addEventListener("click", showBattleTutorial);
 

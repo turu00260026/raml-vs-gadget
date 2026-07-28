@@ -21,7 +21,8 @@
 
   function pushLog(local, message) {
     local.log.push(message);
-    if (local.log.length > 12) local.log.shift();
+    // 1手ごとに行動・数値・反応の3行が出るため、遡れる分を確保する
+    if (local.log.length > 30) local.log.shift();
   }
 
   // 06_script.md の台詞行・演出行を戦闘ログへ流す
@@ -98,6 +99,36 @@
 
   function slotLimit(local) { return 2 + (local.extraSlots || 0); }
 
+  function pick(list, seed) { return list[seed % list.length]; }
+
+  // 1手ごとに「何が起きたか」を数値と対象の反応で返す（数値そのものは変えない）
+  function pushOutcome(definition, local, before, after) {
+    const R = BATTLES.reactions;
+    const seed = local.skills_used.length;
+    const changes = [];
+    if (after.integrity !== before.integrity) changes.push("完全性 " + before.integrity + " → " + after.integrity);
+    if (after.control !== before.control) changes.push("制御 " + before.control + " → " + after.control);
+    if (after.progress !== before.progress) changes.push("進行 " + before.progress + " → " + after.progress);
+    if (after.morale !== before.morale) changes.push("RAML士気 " + before.morale + " → " + after.morale);
+    if (changes.length) pushLog(local, changes.join("　／　"));
+
+    let reaction = "";
+    if (after.integrity < before.integrity) reaction = pick(R.integrityDown, seed);
+    else if (after.control > before.control) reaction = pick(R.controlUp, seed);
+    else if (after.progress < before.progress) reaction = pick(R.progressDown, seed);
+    else if (after.morale > before.morale) reaction = pick(R.moraleUp, seed);
+    if (reaction) pushLog(local, definition.target + "：" + reaction);
+  }
+
+  function snapshot(local, params) {
+    return {
+      integrity: local.node_integrity,
+      control: local.node_control,
+      progress: local.node_progress,
+      morale: params.raml_morale
+    };
+  }
+
   function applyDirectEffects(params, local, effects) {
     let next = clone(params);
     (effects || []).forEach(function (item) {
@@ -141,6 +172,13 @@
       return { ok: false, reason: "この章ではまだ使えません" };
     }
     if (action.battleOnly && action.battleOnly !== definition.id) return { ok: false, reason: "この戦闘では使用できません" };
+    // その場にいない隊員の手順は選べない（02_scenario.md の登場人物に従う）
+    if (definition.absent && definition.absent.length) {
+      const missing = BATTLES.requiredMembers(action).filter(function (name) {
+        return definition.absent.indexOf(name) >= 0;
+      });
+      if (missing.length) return { ok: false, reason: missing.join("・") + "はこの場にいません" };
+    }
     // EV-BT1-TUT のように、特定の戦闘でのみ解放条件を免除するもの
     const exempt = Array.isArray(action.exemptIn) && action.exemptIn.indexOf(definition.id) >= 0;
     if (!exempt) {
@@ -263,6 +301,9 @@
   function applyEnemyPhase(definition, local, params) {
     const sc = script(definition);
     const interrupt = sc.interrupt || {};
+    pushLog(local, "── " + definition.target + " の手番 ──");
+    // 相手は反撃してこない。その理由が伝わるよう最初の手番で一度だけ示す
+    pushOnce(local, "passive", [BATTLES.reactions.passive]);
 
     // 前の割り込み書き換えに対処しなかった場合の被害（chapter01/03 §1-4）
     if (local.pendingCivilian) {
@@ -343,6 +384,12 @@
     const availability = actionAvailable(definition, local, params, action);
     if (!availability.ok) return { ok: false, reason: availability.reason, local: local, params: params };
 
+    const before = snapshot(local, params);
+    // 先に「誰が何をしたか」を出してから、結果を続ける
+    local.skills_used.push(action.id);
+    local.slotsUsed += 1;
+    pushLog(local, "▶ " + (action.user ? action.user + "：" : "") + action.name);
+
     let controlDelta = action.control || 0;
     if (definition.restartOnlyControl && action.id !== "SK-OD-C3-01") controlDelta = 0;
     local.node_integrity = SERIES.clamp(local.node_integrity + (action.integrity || 0));
@@ -364,9 +411,7 @@
     });
     params = applyActionEffect(definition, local, params, action);
     if (action.once) local.once_used[action.id] = true;
-    local.skills_used.push(action.id);
-    local.slotsUsed += 1;
-    pushLog(local, action.name + "を実行");
+    pushOutcome(definition, local, before, snapshot(local, params));
     // 手順に紐づく汎用割り込み台詞は、その戦闘での初使用時のみ流す
     pushOnce(local, "action_" + action.id, BATTLES.actionLines(action, definition.chapter));
     // 傾聴で流れる思想ブロードキャスト（初回のみ）

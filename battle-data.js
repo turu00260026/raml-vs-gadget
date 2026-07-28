@@ -27,6 +27,26 @@
     trust_exp: 3
   };
 
+  // 行動の結果に対する対象（機械）の反応。数値には影響しない演出
+  const REACTIONS = {
+    integrityDown: [
+      "装甲が軋み、駆動音が濁る",
+      "外装の継ぎ目が開き、内部の光が漏れる",
+      "各部の応答が、目に見えて鈍る"
+    ],
+    integrityUp: ["削れた面が塞がり、駆動音が元へ戻る"],
+    controlUp: [
+      "制御系統の一部が、こちらの手に落ちる",
+      "判定テーブルの書き換え権が、少しずつ移る",
+      "命令の宛先が、こちら側へ向き直る"
+    ],
+    progressUp: ["最適化が、先へ進む"],
+    progressDown: ["最適化の進行が、押し戻される"],
+    moraleUp: ["隊の呼吸が整う"],
+    // 攻撃してこない相手であることを、手を出した側に伝える
+    passive: "この個体は攻撃してこない。ただ、守りを固め続けている"
+  };
+
   // 撤退イベント台詞（各章 06_script.md 付録）
   const RETREAT_LINES = {
     1: [sp("リコ", "引く！ 全員、市民側へ——守れるものから守る！")],
@@ -224,6 +244,8 @@
       id: "BT-01", chapter: 1, scene: "SC-05", title: "中継ノード・α",
       target: "中継ノード・α", background: "bg_warehouse_node", asset: "node_alpha_active",
       turnLimit: 8, resolutions: ["destroy", "control"], timeout: "destroy",
+      // 02_scenario.md SC-05 の登場人物。レントンは病院対応中で不在（03 §1-1 に明記）
+      absent: ["レントン"],
       intro: "β版の空白を読み、壊さず手綱を取る道も探す。",
       resultEffects: {
         destroy: [fx("order_insight", 8), fx("raml_morale", 3)],
@@ -402,6 +424,8 @@
       id: "BT-C2-01", chapter: 2, scene: "SC-C2-04", title: "EXノード",
       target: "EXノード", background: "bg_warehouse_node", asset: "node_alpha_active",
       turnLimit: 8, resolutions: ["destroy", "control"], timeout: "destroy",
+      // 02_scenario.md SC-C2-04 の登場人物。レントンは別現場（SC-C2-06）
+      absent: ["レントン"],
       intro: "本家との差分から、粗い防壁の空白を読む。",
       resultEffects: {
         destroy: [fx("order_insight", 8), fx("raml_morale", 3)],
@@ -891,6 +915,12 @@
     return item.speaker ? item.speaker + "「" + item.text + "」" : item.text;
   }
 
+  // その手順に必要な隊員（「全員」「＋任意」は不問）
+  function requiredMembers(action) {
+    if (!action || !action.user || action.user === "全員") return [];
+    return action.user.split("＋").filter(function (name) { return name !== "任意"; });
+  }
+
   // 行動に紐づく汎用割り込み台詞（章別の継承バリアントを含む）
   function actionLines(action, chapter) {
     if (!action) return [];
@@ -920,9 +950,11 @@
     battles: BATTLES,
     dialogueEffects: DIALOGUE_EFFECTS,
     retreatLines: RETREAT_LINES,
+    reactions: REACTIONS,
     getBattle: getBattle,
     formatLine: formatLine,
     actionLines: actionLines,
+    requiredMembers: requiredMembers,
     actionIdsForBattle: actionIdsForBattle
   };
 });

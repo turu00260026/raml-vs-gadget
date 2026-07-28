@@ -403,7 +403,7 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 .command-button[disabled], .resolve-button[disabled] { opacity: .34; cursor: not-allowed; transform: none; }
 
 .battle-log {
-  max-height: 120px;
+  max-height: 176px;
   overflow: auto;
   margin: 15px 0;
   padding: 10px 12px;
@@ -413,6 +413,11 @@ button:focus-visible, select:focus-visible, input:focus-visible {
   font: 12px/1.65 monospace;
 }
 .battle-log p { margin: 0; }
+/* 誰が動いたか・相手がどう反応したかを、流れの中で見分けられるようにする */
+.battle-log p.log-act { margin-top: 8px; color: var(--ink); font-weight: 700; }
+.battle-log p.log-act:first-child { margin-top: 0; }
+.battle-log p.log-num { color: var(--cyan); }
+.battle-log p.log-turn { margin-top: 10px; color: var(--amber); letter-spacing: .06em; }
 .resolution-bar { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .resolve-button { text-align: center; font-weight: 800; background: rgba(244,189,98,.07); }
 .resolve-button:not([disabled]) { border-color: rgba(244,189,98,.55); }
