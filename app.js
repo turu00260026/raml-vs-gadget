@@ -421,6 +421,30 @@
     }).join("");
   }
 
+  // 相手の周期を画面に出す。読めていない拍は伏せ、隙と次の一手を強調する
+  function patternMarkup() {
+    const pattern = Engine.patternOf(battleDefinition);
+    if (!pattern) return "";
+    const index = battleState.patternIndex % pattern.length;
+    const known = battleState.patternKnown;
+    const cells = pattern.map(function (step, i) {
+      const rel = (i - index + pattern.length) % pattern.length;
+      const visible = rel < known || (rel === 0 && battleState.nextConfirmed);
+      const classes = ["beat"];
+      if (rel === 0) classes.push("beat-next");
+      if (visible && step.sync) classes.push("beat-sync");
+      if (!visible) classes.push("beat-unknown");
+      const label = visible ? (step.sync ? "★" + step.name : step.name) : "？";
+      return '<span class="' + classes.join(" ") + '" title="' + escapeHTML(visible ? step.detail : "未解析") + '">' +
+        (rel === 0 ? "▶" : "") + escapeHTML(label) + "</span>";
+    }).join("");
+    const state = battleState.vulnerable
+      ? '<strong class="gap-open">いま隙。叩けば3倍で通る</strong>'
+      : (known >= pattern.length ? "<span>周期は読み切った</span>" : "<span>周期 " + known + " / " + pattern.length + " を解析</span>");
+    return '<div class="pattern-strip"><div class="pattern-head">相手の周期　' + state + "</div>" +
+      '<div class="pattern-beats">' + cells + "</div></div>";
+  }
+
   function offerMarkup() {
     if (!battleState.pendingOffer || !battleDefinition.offer) return "";
     // R2 の文言は戦闘定義側が持つ。第2章＝代行の提案／第3章＝入区勧誘で意味が違う（chapter03/01_plan §7-2）
@@ -468,6 +492,7 @@
           '<div class="phase-strip">行動枠 ' + battleState.slotsUsed + " / 2　｜　GADGET解析 " +
           gameState.params.gadget_analysis + (battleState.collateral ? "　｜　波及 " + battleState.collateral + "件" : "") +
           '　｜　<button class="link-button" id="battle-help">遊び方</button></div>' +
+          patternMarkup() +
           offerMarkup() +
           // ログは手順ボタンより上に置く。下に置くとボタンの列に押し出されて、
           // スマートフォンでは押した結果が画面外になる

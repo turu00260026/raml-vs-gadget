@@ -74,6 +74,12 @@
       moraleHalfTurns: 0,
       civilianHalved: false,
       pendingCivilian: false,
+      // 敵の行動パターン（原作 comic 4P の「同期のラグ」）
+      patternIndex: 0,
+      patternKnown: 0,     // 何拍目まで解析できたか
+      nextConfirmed: false, // レントンの現場読みで次の一手が確定しているか
+      vulnerable: false,    // 同期直後＝無防備
+      syncHit: 0,           // 隙を突いた回数
       revealed: null,
       revealCount: 0,
       blockCount: 0,
@@ -100,6 +106,23 @@
   function slotLimit(local) { return 2 + (local.extraSlots || 0); }
 
   function pick(list, seed) { return list[seed % list.length]; }
+
+  function patternOf(definition) { return BATTLES.patterns[definition.pattern] || null; }
+
+  // いま見えている範囲での「次の一手」。読めていなければ null
+  function nextBeat(definition, local) {
+    const pattern = patternOf(definition);
+    if (!pattern) return null;
+    return pattern[local.patternIndex % pattern.length];
+  }
+
+  function beatVisible(definition, local, offset) {
+    const pattern = patternOf(definition);
+    if (!pattern) return false;
+    // 現場読み（レントン）が通っていれば次の1手だけは確定で見える
+    if (offset === 0 && local.nextConfirmed) return true;
+    return offset < local.patternKnown;
+  }
 
   // 1手ごとに「何が起きたか」を数値と対象の反応で返す（数値そのものは変えない）
   function pushOutcome(definition, local, before, after) {
@@ -271,6 +294,27 @@
         local.weak_exposed = true;
         pushLog(local, "急所を開示（差分解析）");
         break;
+      // ノリの大局分析：次の一手を確実に読み、周期の理解も1拍ぶん進める
+      case "analyze_pattern": {
+        const p = patternOf(definition);
+        if (!p) { pushLog(local, "この相手に決まった周期はない"); break; }
+        local.nextConfirmed = true;
+        if (local.patternKnown < p.length) local.patternKnown += 1;
+        const nb0 = nextBeat(definition, local);
+        pushLog(local, "次は［" + nb0.name + "］" + (nb0.sync ? "——隙が来る" : "") +
+          "（周期 " + local.patternKnown + "/" + p.length + "）");
+        break;
+      }
+      // レントンの現場読み：ゲーマーの目で周期を一息に見抜く（原作 comic 4P）
+      case "read_pattern": {
+        const p2 = patternOf(definition);
+        if (!p2) { pushLog(local, "読むほどの型がない"); break; }
+        local.patternKnown = p2.length;
+        local.nextConfirmed = true;
+        const nb = nextBeat(definition, local);
+        pushLog(local, "周期を読み切った（" + p2.length + "拍）。次は［" + nb.name + "］" + (nb.sync ? "——ここが隙だ" : ""));
+        break;
+      }
       case "extra_slot":
         local.extraSlots += 1;
         pushLog(local, "采配連携。この戦闘の行動枠 +1");
@@ -302,8 +346,9 @@
     const sc = script(definition);
     const interrupt = sc.interrupt || {};
     pushLog(local, "── " + definition.target + " の手番 ──");
-    // 相手は反撃してこない。その理由が伝わるよう最初の手番で一度だけ示す
-    pushOnce(local, "passive", [BATTLES.reactions.passive]);
+    // 隙は1ターン限り。突かなければ閉じる
+    local.vulnerable = false;
+    if (!definition.pattern) pushOnce(local, "passive", [BATTLES.reactions.passive]);
 
     // 前の割り込み書き換えに対処しなかった場合の被害（chapter01/03 §1-4）
     if (local.pendingCivilian) {
@@ -313,6 +358,7 @@
       pushLog(local, "割り込み書き換えに未対処。市民被害が発生。RAML士気 -10");
     }
 
+    const pattern = patternOf(definition);
     if (local.enemyStopTurns > 0) {
       local.enemyStopTurns -= 1;
       pushLog(local, "相手は動かない");
@@ -323,7 +369,50 @@
       } else {
         local.node_progress = SERIES.clamp(local.node_progress + 10);
       }
-      if (local.turn % 2 === 0) {
+      if (pattern) {
+        const step = pattern[local.patternIndex % pattern.length];
+        // その一手を読めていたか（現場読みが通っている／周期を読み切っている）
+        const wasRead = local.nextConfirmed || local.patternKnown >= pattern.length;
+        local.patternIndex += 1;
+        local.nextConfirmed = false;
+        pushLog(local, "［" + step.name + "］" + step.detail);
+        if (step.attack) {
+          applyMorale(local, params, -step.attack);
+          pushLog(local, "RAML士気 -" + step.attack);
+        }
+        if (step.repair) {
+          local.node_integrity = SERIES.clamp(local.node_integrity + step.repair);
+          pushOnce(local, "rebuild", interrupt.rebuild);
+        }
+        if (step.progress) local.node_progress = SERIES.clamp(local.node_progress + step.progress);
+        if (step.civilian) {
+          if (local.blockRewrite > 0) {
+            local.blockRewrite -= 1;
+            local.blockCount += 1;
+            pushLog(local, "割り込み書き換えを笛で止めた");
+          } else if (local.shieldCivilian) {
+            local.blockCount += 1;
+            pushLog(local, "ラインキープで生活側へは通さない");
+          } else {
+            local.pendingCivilian = !local.civilianHalved || local.turn % 4 === 0;
+            if (local.pendingCivilian) {
+              pushLog(local, "このターン中に対処しないと市民被害");
+              pushOnce(local, "rewrite", interrupt.rewrite);
+            } else {
+              pushLog(local, "先回りの退避が効いている");
+            }
+          }
+        }
+        if (step.sync) {
+          // 隙は「読めていた者」にだけ見える。原作 comic 4P のパターン解析
+          if (wasRead) {
+            local.vulnerable = true;
+            pushLog(local, "★ 同期のラグ——読みどおり。いま叩けば大きく通る");
+          } else {
+            pushLog(local, "……何かが噛み合った気配がした。読めていれば、ここが隙だった");
+          }
+        }
+      } else if (local.turn % 2 === 0) {
         if (local.blockRewrite > 0) {
           local.blockRewrite -= 1;
           local.blockCount += 1;
@@ -391,8 +480,21 @@
     pushLog(local, "▶ " + (action.user ? action.user + "：" : "") + action.name);
 
     let controlDelta = action.control || 0;
+    let integrityDelta = action.integrity || 0;
     if (definition.restartOnlyControl && action.id !== "SK-OD-C3-01") controlDelta = 0;
-    local.node_integrity = SERIES.clamp(local.node_integrity + (action.integrity || 0));
+    // 原作 comic 4P「同期のラグをつけば勝てる！」——同期している間は硬く、ラグの一瞬だけ通る
+    if (local.vulnerable && (integrityDelta < 0 || controlDelta > 0)) {
+      integrityDelta *= 3;
+      controlDelta *= 3;
+      local.vulnerable = false;
+      local.syncHit += 1;
+      pushLog(local, "★ 同期のラグを突いた！ 効果3倍");
+    } else if (patternOf(definition) && integrityDelta < 0) {
+      // 同期中は硬い。力任せでは削り切れない（原作: 力比べではなくパターン解析で勝つ）
+      integrityDelta = Math.ceil(integrityDelta * 0.15);
+      pushLog(local, "同期した守りが受け止める。ほとんど通らない");
+    }
+    local.node_integrity = SERIES.clamp(local.node_integrity + integrityDelta);
     local.node_control = SERIES.clamp(local.node_control + controlDelta);
     local.node_progress = SERIES.clamp(local.node_progress + (action.progress || 0));
     if (action.morale) applyMorale(local, params, action.morale);
@@ -617,6 +719,9 @@
   return {
     createBattleState: createBattleState,
     slotLimit: slotLimit,
+    patternOf: patternOf,
+    nextBeat: nextBeat,
+    beatVisible: beatVisible,
     actionAvailable: actionAvailable,
     performAction: performAction,
     performOffer: performOffer,

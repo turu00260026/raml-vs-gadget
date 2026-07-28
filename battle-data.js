@@ -47,6 +47,36 @@
     passive: "この個体は攻撃してこない。ただ、守りを固め続けている"
   };
 
+  // 敵の行動パターン（原作 comic 4P「こいつら同期してやがるのか…」「同期のラグをつけば勝てる！」）。
+  // 周期で回り、sync のターンだけ無防備になる。読めば勝てる／読まなければ削られる
+  function beat(name, detail, opts) {
+    return Object.assign({ name: name, detail: detail }, opts || {});
+  }
+
+  const PATTERNS = {
+    // 中継ノード・α。護衛の量産機が同期して動く。4拍で1周
+    guard_sync: [
+      beat("一斉射撃", "護衛機が同時に撃ってくる", { attack: 10 }),
+      beat("防壁再構成", "削られた面を建て直す", { repair: 10 }),
+      beat("割り込み書き換え", "生活系統へ手を伸ばす", { civilian: true }),
+      beat("同期", "全機が指令を取り直す——無防備になる", { sync: true })
+    ],
+    // 粗い継ぎ接ぎのEXノード。周期が短く隙も多いが、そのぶん火力が高い
+    rough_sync: [
+      beat("掃射", "狙いも粗いまま撃ってくる", { attack: 13 }),
+      beat("同期", "継ぎ接ぎの指令が揃う——無防備になる", { sync: true }),
+      beat("再構成", "同じ壁を、同じ場所に建て直す", { repair: 8 })
+    ],
+    // 中枢級。5拍と長く、隙が深い位置にある。読み切らないと届かない
+    core_sync: [
+      beat("最終同期", "統一の処理を先へ進める", { progress: 12 }),
+      beat("防衛判定", "非効率と判定したものを弾く", { attack: 10 }),
+      beat("割り込み書き換え", "生活系統へ手を伸ばす", { civilian: true }),
+      beat("演算集中", "全系統が同じ計算に入る——無防備になる", { sync: true }),
+      beat("再配置", "防壁を組み替える", { repair: 10 })
+    ]
+  };
+
   // 撤退イベント台詞（各章 06_script.md 付録）
   const RETREAT_LINES = {
     1: [sp("リコ", "引く！ 全員、市民側へ——守れるものから守る！")],
@@ -166,10 +196,19 @@
     // ---- 補助コマンド ----
     "SK-AN-01": {
       id: "SK-AN-01", name: "解析", user: "ノリ",
-      detail: "構造を読み、GADGET解析とAI習熟を得る",
+      detail: "戦況の大局を読む。相手の行動パターンが1段ずつ見えてくる",
+      effect: "analyze_pattern",
       gains: [fx("gadget_analysis", 6), fx("ai_mastery", 2)], tags: ["analysis"],
       line: sp("ノリ", "読めてきた。……この設計、こちらの手にも馴染む"),
       lineByChapter: { 4: sp("ノリ", "読めてます。……この規格、癖はいつもと同じです") }
+    },
+    // 原作 comic 4P: レントンはゲーマーの目で現場のパターンを読む。
+    // ノリの大局分析（構造を暴く）に対して、こちらは「次の一手」を確定させる現場の目
+    "SK-AN-03": {
+      id: "SK-AN-03", name: "パターン読み", user: "レントン",
+      detail: "相手の周期を現場で読み、次の一手を確定させる",
+      effect: "read_pattern", gains: [fx("gadget_analysis", 3)], tags: ["analysis", "read"],
+      line: sp("レントン", "動きに癖があるわ。……ゲームも戦場も、パターン解析すれば勝てるんよ")
     },
     "SK-AN-02": {
       id: "SK-AN-02", name: "差分解析", user: "全員",
@@ -246,6 +285,7 @@
       turnLimit: 8, resolutions: ["destroy", "control"], timeout: "destroy",
       // 02_scenario.md SC-05 の登場人物。レントンは病院対応中で不在（03 §1-1 に明記）
       absent: ["レントン"],
+      pattern: "guard_sync",
       intro: "β版の空白を読み、壊さず手綱を取る道も探す。",
       resultEffects: {
         destroy: [fx("order_insight", 8), fx("raml_morale", 3)],
@@ -951,6 +991,7 @@
     dialogueEffects: DIALOGUE_EFFECTS,
     retreatLines: RETREAT_LINES,
     reactions: REACTIONS,
+    patterns: PATTERNS,
     getBattle: getBattle,
     formatLine: formatLine,
     actionLines: actionLines,

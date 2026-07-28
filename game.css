@@ -409,6 +409,30 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 .command-button small { color: var(--muted); font-size: 11px; }
 .command-button[disabled], .resolve-button[disabled] { opacity: .34; cursor: not-allowed; transform: none; }
 
+/* 相手の周期表示。読めた拍だけが開き、隙が光る */
+.pattern-strip {
+  margin: 14px 0;
+  padding: 12px 14px;
+  background: rgba(0,0,0,.3);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--amber);
+}
+.pattern-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; color: var(--muted); font-size: 12px; }
+.pattern-head strong.gap-open { color: #0b1a1e; background: var(--amber); padding: 2px 8px; font-size: 12px; animation: gap-pulse .9s ease-in-out infinite; }
+.pattern-beats { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.beat {
+  padding: 6px 10px;
+  font: 700 12px/1.2 monospace;
+  color: var(--muted);
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+.beat-unknown { color: rgba(255,255,255,.28); }
+.beat-next { color: var(--ink); border-color: var(--cyan); background: rgba(80,228,210,.1); }
+.beat-sync { color: var(--amber); border-color: rgba(244,189,98,.6); background: rgba(244,189,98,.1); }
+@keyframes gap-pulse { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
+
 .battle-log {
   max-height: 176px;
   overflow: auto;
