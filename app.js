@@ -464,8 +464,19 @@
     const state = battleState.vulnerable
       ? '<strong class="gap-open">いま隙。叩けば3倍で通る</strong>'
       : (known >= pattern.length ? "<span>周期は読み切った</span>" : "<span>周期 " + known + " / " + pattern.length + " を解析</span>");
+    // 次の一手が読めているなら、それを潰す手を教える（拍ごとに正解が変わる）
+    const upcoming = Engine.nextBeat(battleDefinition, battleState);
+    const read = known >= pattern.length || battleState.nextConfirmed;
+    let advice = "";
+    if (read && upcoming) {
+      advice = upcoming.sync
+        ? '<div class="pattern-advice sync">次は隙。<strong>削る手・掌握する手</strong>を叩き込むと3倍で通る</div>'
+        : (upcoming.counter
+          ? '<div class="pattern-advice">先に<strong>' + escapeHTML(upcoming.counterName) + "</strong>できる手を打てば、この一手は不発にできる</div>"
+          : "");
+    }
     return '<div class="pattern-strip"><div class="pattern-head">相手の周期　' + state + "</div>" +
-      '<div class="pattern-beats">' + cells + "</div></div>";
+      '<div class="pattern-beats">' + cells + "</div>" + advice + "</div>";
   }
 
   function offerMarkup() {

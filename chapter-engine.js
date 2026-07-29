@@ -80,6 +80,8 @@
       nextConfirmed: false, // レントンの現場読みで次の一手が確定しているか
       vulnerable: false,    // 同期直後＝無防備
       syncHit: 0,           // 隙を突いた回数
+      counterReady: null,   // 次の一手に対して構えたタグ
+      counterHit: 0,        // 読み勝って封じた回数
       revealed: null,
       revealCount: 0,
       blockCount: 0,
@@ -376,16 +378,26 @@
         local.patternIndex += 1;
         local.nextConfirmed = false;
         pushLog(local, "［" + step.name + "］" + step.detail);
-        if (step.attack) {
+        // 読んで構えていた手が刺さると、その拍は丸ごと不発になる
+        const countered = Boolean(step.counter) && local.counterReady === step.counter;
+        local.counterReady = null;
+        if (countered) {
+          local.counterHit += 1;
+          pushLog(local, "★ 読み勝ち。" + step.counterName + "が間に合った——不発");
+          // applyEnemyPhase は params を直接書き換える契約なので、獲得は書き戻す
+          Object.assign(params, applyCappedGain(params, local, "order_insight", 3));
+          Object.assign(params, applyCappedGain(params, local, "gadget_analysis", 2));
+        }
+        if (step.attack && !countered) {
           applyMorale(local, params, -step.attack);
           pushLog(local, "RAML士気 -" + step.attack);
         }
-        if (step.repair) {
+        if (step.repair && !countered) {
           local.node_integrity = SERIES.clamp(local.node_integrity + step.repair);
           pushOnce(local, "rebuild", interrupt.rebuild);
         }
-        if (step.progress) local.node_progress = SERIES.clamp(local.node_progress + step.progress);
-        if (step.civilian) {
+        if (step.progress && !countered) local.node_progress = SERIES.clamp(local.node_progress + step.progress);
+        if (step.civilian && !countered) {
           if (local.blockRewrite > 0) {
             local.blockRewrite -= 1;
             local.blockCount += 1;
@@ -496,6 +508,15 @@
     }
     local.node_integrity = SERIES.clamp(local.node_integrity + integrityDelta);
     local.node_control = SERIES.clamp(local.node_control + controlDelta);
+
+    // 次の一手を読めているなら、それに合わせた手が「構え」になる（拍ごとに正解が変わる）
+    const upcoming = nextBeat(definition, local);
+    const patternRead = patternOf(definition) &&
+      (local.nextConfirmed || local.patternKnown >= patternOf(definition).length);
+    if (upcoming && upcoming.counter && patternRead && action.tags.indexOf(upcoming.counter) >= 0) {
+      local.counterReady = upcoming.counter;
+      pushLog(local, "◆ " + upcoming.counterName + "——［" + upcoming.name + "］に備えた");
+    }
     local.node_progress = SERIES.clamp(local.node_progress + (action.progress || 0));
     if (action.morale) applyMorale(local, params, action.morale);
 

@@ -53,27 +53,29 @@
     return Object.assign({ name: name, detail: detail }, opts || {});
   }
 
+  // counter: その拍を読んだうえで、このタグを持つ手を先に打っておくと封じられる。
+  // どの拍にも対策があるので、周期を読めば全ての手順に出番が生まれる
   const PATTERNS = {
     // 中継ノード・α。護衛の量産機が同期して動く。4拍で1周
     guard_sync: [
-      beat("一斉射撃", "護衛機が同時に撃ってくる", { attack: 10 }),
-      beat("防壁再構成", "削られた面を建て直す", { repair: 10 }),
-      beat("割り込み書き換え", "生活系統へ手を伸ばす", { civilian: true }),
+      beat("一斉射撃", "護衛機が同時に撃ってくる", { attack: 10, counter: "block", counterName: "射線を封鎖" }),
+      beat("防壁再構成", "削られた面を建て直す", { repair: 10, counter: "grasp", counterName: "再構成の手順を掌握" }),
+      beat("割り込み書き換え", "生活系統へ手を伸ばす", { civilian: true, counter: "protection", counterName: "生活側を保護" }),
       beat("同期", "全機が指令を取り直す——無防備になる", { sync: true })
     ],
     // 粗い継ぎ接ぎのEXノード。周期が短く隙も多いが、そのぶん火力が高い
     rough_sync: [
-      beat("掃射", "狙いも粗いまま撃ってくる", { attack: 13 }),
+      beat("掃射", "狙いも粗いまま撃ってくる", { attack: 13, counter: "block", counterName: "射線を封鎖" }),
       beat("同期", "継ぎ接ぎの指令が揃う——無防備になる", { sync: true }),
-      beat("再構成", "同じ壁を、同じ場所に建て直す", { repair: 8 })
+      beat("再構成", "同じ壁を、同じ場所に建て直す", { repair: 8, counter: "grasp", counterName: "再構成の手順を掌握" })
     ],
     // 中枢級。5拍と長く、隙が深い位置にある。読み切らないと届かない
     core_sync: [
-      beat("最終同期", "統一の処理を先へ進める", { progress: 12 }),
-      beat("防衛判定", "非効率と判定したものを弾く", { attack: 10 }),
-      beat("割り込み書き換え", "生活系統へ手を伸ばす", { civilian: true }),
+      beat("最終同期", "統一の処理を先へ進める", { progress: 12, counter: "listening", counterName: "発信を最後まで聞く" }),
+      beat("防衛判定", "非効率と判定したものを弾く", { attack: 10, counter: "block", counterName: "射線を封鎖" }),
+      beat("割り込み書き換え", "生活系統へ手を伸ばす", { civilian: true, counter: "protection", counterName: "生活側を保護" }),
       beat("演算集中", "全系統が同じ計算に入る——無防備になる", { sync: true }),
-      beat("再配置", "防壁を組み替える", { repair: 10 })
+      beat("再配置", "防壁を組み替える", { repair: 10, counter: "grasp", counterName: "組み替えを掌握" })
     ]
   };
 
@@ -92,8 +94,9 @@
     "SK-OD-01": {
       id: "SK-OD-01", name: "プロトコル封鎖", user: "リコ",
       detail: "進行を1ターン停止する。割り込み書き換えを防げば市民保護扱い",
+      // 正典（chapter01/03 §2）: 割り込み書き換えを封鎖で防げば市民保護扱い＝protection も兼ねる
       effect: "freeze_progress", effectStrong: { key: "order_insight", value: 25 },
-      tags: ["order", "block"],
+      tags: ["order", "block", "protection"],
       line: sp("リコ", "そこは通さない。手順どおりに、確実に")
     },
     "SK-OD-02": {
