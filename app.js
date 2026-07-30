@@ -533,11 +533,14 @@
           // ログは手順ボタンより上に置く。下に置くとボタンの列に押し出されて、
           // スマートフォンでは押した結果が画面外になる
           '<div class="battle-log" id="battle-log">' + battleState.log.map(function (item) {
-            let cls = "";
-            if (/^▶/.test(item)) cls = " class=\"log-act\"";
-            else if (/^──/.test(item)) cls = " class=\"log-turn\"";
-            else if (/→/.test(item) && /(完全性|制御|進行|RAML士気)/.test(item)) cls = " class=\"log-num\"";
-            return "<p" + cls + ">" + escapeHTML(item) + "</p>";
+            // 種別ごとに見た目を変えて、戦況の流れを目で追えるようにする
+            const text = (item && item.t !== undefined) ? item.t : item;
+            const kind = (item && item.k) ? item.k : "info";
+            if (kind === "turn-own" || kind === "turn-foe" || kind === "turn") {
+              const label = text.replace(/^──\s*/, "").replace(/\s*──$/, "");
+              return '<p class="log-sep log-' + kind + '"><span>' + escapeHTML(label) + "</span></p>";
+            }
+            return '<p class="log-' + kind + '">' + escapeHTML(text) + "</p>";
           }).join("") + "</div>" +
           (battleState.pendingOffer ? "" : battleActionButtons()) +
           '<div class="resolution-bar">' + resolutionButtons() + "</div>" +

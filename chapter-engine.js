@@ -19,8 +19,24 @@
 
   function script(definition) { return definition.script || {}; }
 
-  function pushLog(local, message) {
-    local.log.push(message);
+  // ログ1行の種別。画面側がこれを見て見た目を変える
+  function classify(message) {
+    if (/^▶/.test(message)) return "act";
+    if (/^──/.test(message)) return "turn";
+    if (/^★/.test(message)) return "good";
+    if (/^◆/.test(message)) return "ready";
+    if (/^［/.test(message)) return "enemy";
+    if (/→/.test(message) && /(完全性|制御|進行|RAML士気)/.test(message)) return "num";
+    if (/(RAML士気 -|市民被害|波及|被害イベント)/.test(message)) return "bad";
+    if (/^[^「：]+「/.test(message)) return "line";
+    if (/(受け止め|通らない|届かない|動かない|噛み合った気配)/.test(message)) return "guard";
+    if (/(封鎖|停止|無効|開示|半減|解消|再代行|周期|読み切|次は［|枠 \+)/.test(message)) return "effect";
+    if (/：/.test(message)) return "react";
+    return "info";
+  }
+
+  function pushLog(local, message, kind) {
+    local.log.push({ t: message, k: kind || classify(message) });
     // 1手ごとに行動・数値・反応の3行が出るため、遡れる分を確保する
     if (local.log.length > 30) local.log.shift();
   }
@@ -29,7 +45,9 @@
   function pushLines(local, lines) {
     (lines || []).forEach(function (item) {
       const text = BATTLES.formatLine(item);
-      if (text) pushLog(local, text);
+      if (!text) return;
+      const spoken = item && typeof item === "object" && item.speaker;
+      pushLog(local, text, spoken ? "line" : "stage");
     });
   }
 
@@ -44,10 +62,10 @@
   }
 
   function openingLog(definition) {
-    const lines = [definition.intro];
+    const lines = [{ t: definition.intro, k: "stage" }];
     (script(definition).open || []).forEach(function (item) {
       const text = BATTLES.formatLine(item);
-      if (text) lines.push(text);
+      if (text) lines.push({ t: text, k: item.speaker ? "line" : "stage" });
     });
     return lines;
   }
@@ -347,7 +365,7 @@
   function applyEnemyPhase(definition, local, params) {
     const sc = script(definition);
     const interrupt = sc.interrupt || {};
-    pushLog(local, "── " + definition.target + " の手番 ──");
+    pushLog(local, "── " + definition.target + " の手番 ──", "turn-foe");
     // 隙は1ターン限り。突かなければ閉じる
     local.vulnerable = false;
     if (!definition.pattern) pushOnce(local, "passive", [BATTLES.reactions.passive]);
@@ -475,6 +493,7 @@
       local.timedOut = true;
     } else {
       local.turn += 1;
+      pushLog(local, "── TURN " + local.turn + " / " + definition.turnLimit + "　RAMLの手番 ──", "turn-own");
     }
   }
 

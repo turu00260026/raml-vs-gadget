@@ -489,11 +489,61 @@ button:focus-visible, select:focus-visible, input:focus-visible {
   font: 12px/1.65 monospace;
 }
 .battle-log p { margin: 0; }
-/* 誰が動いたか・相手がどう反応したかを、流れの中で見分けられるようにする */
-.battle-log p.log-act { margin-top: 8px; color: var(--ink); font-weight: 700; }
-.battle-log p.log-act:first-child { margin-top: 0; }
-.battle-log p.log-num { color: var(--cyan); }
-.battle-log p.log-turn { margin-top: 10px; color: var(--amber); letter-spacing: .06em; }
+
+/* 戦況の流れを目で追えるように、行の種別ごとに見た目を変える */
+.battle-log { font: 13px/1.7 var(--font-ui, inherit); }
+.battle-log p { padding: 1px 0 1px 10px; border-left: 2px solid transparent; }
+
+/* 手番の区切り。左右の線で挟んで、どちらの手番かを色で示す */
+.battle-log p.log-sep {
+  display: flex; align-items: center; gap: 8px;
+  margin: 12px 0 6px; padding: 0;
+  border-left: 0;
+  font: 700 11px/1 monospace; letter-spacing: .1em;
+}
+.battle-log p.log-sep::before, .battle-log p.log-sep::after {
+  content: ""; flex: 1; height: 1px; background: currentColor; opacity: .35;
+}
+.battle-log p.log-sep:first-child { margin-top: 0; }
+.battle-log p.log-turn-own { color: var(--cyan); }
+.battle-log p.log-turn-foe, .battle-log p.log-turn { color: var(--coral, #f4bd62); }
+
+/* RAML側の行動 */
+.battle-log p.log-act {
+  margin-top: 6px;
+  color: var(--ink); font-weight: 700; font-size: 14px;
+  border-left-color: var(--cyan);
+  background: linear-gradient(90deg, rgba(80,228,210,.09), transparent 70%);
+}
+/* 相手の一手 */
+.battle-log p.log-enemy {
+  margin-top: 6px;
+  color: #ffd9a0; font-weight: 700; font-size: 14px;
+  border-left-color: var(--amber);
+  background: linear-gradient(90deg, rgba(244,189,98,.1), transparent 70%);
+}
+/* 数値の動き */
+.battle-log p.log-num { color: var(--cyan); font-family: monospace; font-size: 13px; }
+/* 読み勝ち・隙を突いた */
+.battle-log p.log-good {
+  color: #0b1a1e; font-weight: 800;
+  background: var(--amber); border-left-color: var(--amber);
+  padding: 4px 10px; margin: 4px 0;
+}
+/* 構えた */
+.battle-log p.log-ready { color: var(--cyan); border-left-color: rgba(80,228,210,.5); }
+/* 被弾・被害 */
+.battle-log p.log-bad { color: #ff9a8a; border-left-color: rgba(255,120,100,.55); }
+/* 効果が通った（封鎖・開示・解析など） */
+.battle-log p.log-effect { color: #cfe9e4; border-left-color: rgba(80,228,210,.28); }
+/* 受け止められた・通らなかった */
+.battle-log p.log-guard { color: rgba(255,255,255,.45); }
+/* 対象の反応 */
+.battle-log p.log-react { color: rgba(255,255,255,.62); font-style: italic; }
+/* 台詞と演出 */
+.battle-log p.log-line { color: var(--ink); }
+.battle-log p.log-stage { color: var(--muted); }
+.battle-log p.log-info { color: var(--muted); }
 .resolution-bar { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .resolve-button { text-align: center; font-weight: 800; background: rgba(244,189,98,.07); }
 .resolve-button:not([disabled]) { border-color: rgba(244,189,98,.55); }
