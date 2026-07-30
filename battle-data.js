@@ -76,6 +76,25 @@
       beat("割り込み書き換え", "生活系統へ手を伸ばす", { civilian: true, counter: "protection", counterName: "生活側を保護" }),
       beat("演算集中", "全系統が同じ計算に入る——無防備になる", { sync: true }),
       beat("再配置", "防壁を組み替える", { repair: 10, counter: "grasp", counterName: "組み替えを掌握" })
+    ],
+    // 群体（代行機群・無人デモ群）。数で押してくる。隙は早い位置にあるが一瞬で閉じる
+    swarm_sync: [
+      beat("一斉展開", "群れが同時に動き出す", { attack: 8, counter: "block", counterName: "射線を封鎖" }),
+      beat("決定の上書き", "市民の決めかけた用事を書き換える", { civilian: true, counter: "protection", counterName: "生活側を保護" }),
+      beat("群体同期", "全機の指令が一つに揃う——無防備になる", { sync: true }),
+      beat("隊列再編", "崩れた列を組み直す", { repair: 6, counter: "grasp", counterName: "隊列の指令を掌握" })
+    ],
+    // 暴走した凍結網（RAML側の装置）。人は撃たない。ただ、止めた手が勝手に締まり続ける
+    frozen_loop: [
+      beat("例外承認の拒否", "解除の申請を、片端から弾いていく", { civilian: true, counter: "protection", counterName: "生活側を保護" }),
+      beat("過剰照合", "止める理由を、自分で足していく", { repair: 12, counter: "grasp", counterName: "照合の手順を掌握" }),
+      beat("演算の谷", "自問が一巡し、判定が空になる——無防備になる", { sync: true })
+    ],
+    // 最終同期の先導役。攻撃してこない。ただひたすら前へ進める＝時間との戦い
+    vanguard_sync: [
+      beat("同期加速", "先導路の処理を一気に前へ送る", { progress: 15, counter: "listening", counterName: "発信を最後まで聞く" }),
+      beat("前進", "淡々と次の区画へ進む", { progress: 10, counter: "grasp", counterName: "進路の指令を掌握" }),
+      beat("演算切替", "先導の計算が切り替わる——無防備になる", { sync: true })
     ]
   };
 
@@ -332,6 +351,8 @@
       id: "BT-02", chapter: 1, scene: "SC-07", title: "中継ノード・β",
       target: "中継ノード・β", background: "bg_hospital_courtyard", asset: "node_beta_active",
       turnLimit: 8, resolutions: ["destroy", "control", "dialogue", "avoid"], timeout: "avoid",
+      // 院内系統と直結した、丁寧すぎる守り
+      pattern: "guard_sync",
       intro: "院内系統を守りながら、事情を機械へ通す。",
       resultEffects: {
         destroy: [fx("order_insight", 5), fx("raml_morale", -5)],
@@ -386,6 +407,8 @@
       target: "AUTONOMY中枢", background: "bg_old_server_room", asset: "autonomy_core_active",
       turnLimit: 10, resolutions: ["destroy", "control", "dialogue"], timeout: "retreated",
       finalBattle: true, controlGA: 30, dialogueGA: 45, requireClause: false,
+      // 中枢級。5拍と長く、隙が深い
+      pattern: "core_sync",
       intro: "攻撃対象は中枢のみ。思想を聞くか、手続きを断つか。",
       dialogueLines: {
         d1: "君らは秩序の名前で人を縛ってるだけだ。回せない側を、ボクは待ち時間から出したい。",
@@ -469,6 +492,8 @@
       turnLimit: 8, resolutions: ["destroy", "control"], timeout: "destroy",
       // 02_scenario.md SC-C2-04 の登場人物。レントンは別現場（SC-C2-06）
       absent: ["レントン"],
+      // 継ぎ接ぎのEX。周期が短く隙も多いが火力が高い
+      pattern: "rough_sync",
       intro: "本家との差分から、粗い防壁の空白を読む。",
       resultEffects: {
         destroy: [fx("order_insight", 8), fx("raml_morale", 3)],
@@ -516,6 +541,8 @@
         id: "EV-BTC2-2-OFFER", text: "アナタノ面倒ゴトヲ、代行シマス",
         acceptLabel: "任せてみる", rejectLabel: "断る"
       },
+      // 群体。数で押してくる
+      pattern: "swarm_sync",
       intro: "抱えた決断を本人へ返してから、機械だけを止める。",
       resultEffects: {
         destroy: [fx("order_insight", 5)],
@@ -571,6 +598,8 @@
       target: "EX中枢", background: "bg_old_server_room", asset: "autonomy_core_active",
       turnLimit: 10, resolutions: ["destroy", "control", "dialogue"], timeout: "retreated",
       finalBattle: true, controlGA: 60, dialogueGA: 68, requireClause: false,
+      // EX中枢も本家より粗い。周期は短い
+      pattern: "rough_sync",
       intro: "作者の責任とRAMLの監査。攻撃対象はEX中枢のみ。",
       dialogueLines: {
         d1: "EXはボクの思想じゃない。意思確認を全部削って、便利だけに三万人が拍手した。",
@@ -655,6 +684,8 @@
         // 第3章の R2 は「入区勧誘」。第2章の「代行を任せる」とは意味が違う（01_plan §7-2）
         acceptLabel: "手続き画面を最後まで進ませてみる", rejectLabel: "断る"
       },
+      // 善意の壁。守り方が丁寧
+      pattern: "guard_sync",
       intro: "快適な地区の境界と、その外側の生活を同時に見る。",
       resultEffects: {
         destroy: [fx("order_insight", 8)],
@@ -703,6 +734,8 @@
       turnLimit: 8, resolutions: ["destroy", "control"], timeout: "destroy",
       collateralOnPhysical: true, collateralName: "守りの空白",
       restartOnlyControl: true,
+      // RAML自身の装置。人は撃たず、ただ締め続ける
+      pattern: "frozen_loop",
       intro: "自分たちの正しさを、壊すか、緩めて再開させるか。",
       resultEffects: {
         destroy: [fx("freedom_insight", 5)],
@@ -741,6 +774,8 @@
       target: "rc中枢", background: "bg_old_server_room", asset: "autonomy_core_active",
       turnLimit: 10, resolutions: ["destroy", "control", "dialogue"], timeout: "retreated",
       finalBattle: true, controlGA: 72, dialogueGA: 80, requireClause: true,
+      // 中枢級
+      pattern: "core_sync",
       intro: "攻撃対象はrc中枢のみ。出口のない自由へ、離脱条項を示す。",
       dialogueLines: {
         d1: "ルールを統一すれば、雑なコピーも待ち時間も消える。論理は通ってる。",
@@ -803,6 +838,8 @@
       id: "BT-C4-01", chapter: 4, scene: "SC-C4-03", title: "最終同期先行ノード",
       target: "先行ノード", background: "bg_warehouse_node", asset: "node_alpha_active",
       turnLimit: 8, resolutions: ["destroy", "control", "avoid"], timeout: "avoid",
+      // 先導役。攻撃せず、ひたすら前へ
+      pattern: "vanguard_sync",
       intro: "これまでの全手順を使い、最終同期を先導する機械へ対処する。",
       resultEffects: {
         destroy: [fx("order_insight", 8)],
@@ -836,6 +873,8 @@
       target: "無人デモ群", background: "bg_cityhall_night", asset: "ryousan_clean",
       turnLimit: 8, resolutions: ["destroy", "control", "avoid"], timeout: "avoid",
       collateralOnPhysical: true, collateralName: "宙に浮いた処理",
+      // 無人の群体
+      pattern: "swarm_sync",
       intro: "人の姿はない。自動化ツールが抱える生活処理を守り、機械だけを止める。",
       resultEffects: {
         destroy: [fx("order_insight", 5)],
@@ -882,6 +921,8 @@
       target: "Ver.1.0中枢", background: "bg_old_server_room", asset: "autonomy_core_active",
       turnLimit: 10, resolutions: ["destroy", "control", "dialogue"], timeout: "retreated",
       finalBattle: true, controlGA: 78, dialogueGA: 85, requireClause: true,
+      // 最終同期の中枢
+      pattern: "core_sync",
       intro: "攻撃対象は中枢のみ。新しい技はない。積み重ねた選び方のすべてで臨む。",
       dialogueLines: {
         d1: "世界が同じルールなら、誰も迷わない。誰も待たない。これが統一のリリースだ。",
