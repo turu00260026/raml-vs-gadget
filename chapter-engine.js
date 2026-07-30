@@ -520,10 +520,18 @@
       local.vulnerable = false;
       local.syncHit += 1;
       pushLog(local, "★ 同期のラグを突いた！ 効果3倍");
-    } else if (patternOf(definition) && integrityDelta < 0) {
-      // 同期中は硬い。力任せでは削り切れない（原作: 力比べではなくパターン解析で勝つ）
-      integrityDelta = Math.ceil(integrityDelta * 0.15);
-      pushLog(local, "同期した守りが受け止める。ほとんど通らない");
+    } else if (patternOf(definition) && (integrityDelta < 0 || controlDelta > 0)) {
+      // 同期中は指令系統も装甲も硬い。力任せ・手数任せでは抜けない
+      const guarded = [];
+      if (integrityDelta < 0) {
+        integrityDelta = Math.ceil(integrityDelta * 0.15);
+        guarded.push("装甲は同期した守りが受け止める");
+      }
+      if (controlDelta > 0) {
+        controlDelta = Math.floor(controlDelta * 0.3);
+        guarded.push("指令系統が揃っていて掌握しきれない");
+      }
+      pushLog(local, guarded.join("。") + "。ほとんど通らない");
     }
     local.node_integrity = SERIES.clamp(local.node_integrity + integrityDelta);
     local.node_control = SERIES.clamp(local.node_control + controlDelta);
