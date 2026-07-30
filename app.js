@@ -22,6 +22,9 @@
   let advIndex = 0;
   let pendingLines = null;
   let hitEffect = null;
+  let pendingPops = [];
+  let prevGauges = null;
+  let flashDamage = false;
   let currentScene = null;
   let settings = loadSettings();
 
@@ -393,10 +396,66 @@
     renderBattle();
   }
 
-  function gauge(label, value, cssClass) {
-    return '<div class="gauge-card"><div class="gauge-label"><span>' + escapeHTML(label) +
-      "</span><strong>" + escapeHTML(value) + '</strong></div><div class="gauge-track"><div class="gauge-fill ' +
-      escapeHTML(cssClass || "") + '" style="width:' + Math.max(0, Math.min(100, value)) + '%"></div></div></div>';
+  // ゲージ。直前の値との差を、減った幅の残像と増減バッジで見せる
+  function gauge(label, value, cssClass, prev) {
+    const now = Math.max(0, Math.min(100, value));
+    const diff = (typeof prev === "number") ? value - prev : 0;
+    let ghost = "";
+    if (diff < 0) {
+      ghost = '<div class="gauge-ghost" style="left:' + now + "%;width:" + Math.min(100 - now, -diff) + '%"></div>';
+    } else if (diff > 0) {
+      ghost = '<div class="gauge-ghost up" style="left:' + Math.max(0, now - diff) + "%;width:" + diff + '%"></div>';
+    }
+    const badge = diff !== 0
+      ? '<span class="gauge-diff ' + (diff > 0 ? "up" : "down") + '">' + (diff > 0 ? "+" : "") + diff + "</span>"
+      : "";
+    return '<div class="gauge-card' + (diff !== 0 ? " changed" : "") + '"><div class="gauge-label"><span>' +
+      escapeHTML(label) + "</span><strong>" + escapeHTML(value) + badge +
+      '</strong></div><div class="gauge-track"><div class="gauge-fill ' +
+      escapeHTML(cssClass || "") + '" style="width:' + now + '%"></div>' + ghost + "</div></div>";
+  }
+
+  // 1手の結果を、飛ぶ数値・的の揺れ・被弾フラッシュにまとめて翻訳する
+  function buildFeedback(snap, result) {
+    const dIntegrity = result.local.node_integrity - snap.integrity;
+    const dControl = result.local.node_control - snap.control;
+    const dMorale = result.params.raml_morale - snap.morale;
+    const sync = result.local.syncHit > snap.sync;
+    const counter = result.local.counterHit > snap.counter;
+    pendingPops = [];
+
+    if (dIntegrity < 0) {
+      const weak = dIntegrity > -12;
+      pendingPops.push({
+        text: String(dIntegrity),
+        kind: sync ? "crit" : (weak ? "weak" : "hit"),
+        note: sync ? "ラグ直撃" : (weak ? "受け止められた" : "")
+      });
+    }
+    if (dControl > 0) {
+      pendingPops.push({
+        text: "制御 +" + dControl,
+        kind: sync ? "crit-grasp" : "grasp",
+        note: sync ? "ラグ直撃" : ""
+      });
+    }
+    if (counter) pendingPops.push({ text: "不発", kind: "counter", note: "読み勝ち" });
+    if (dMorale < 0) pendingPops.push({ text: "士気 " + dMorale, kind: "morale" });
+    else if (dMorale > 0) pendingPops.push({ text: "士気 +" + dMorale, kind: "heal" });
+
+    if (sync) hitEffect = "hit-big";
+    else if (dIntegrity <= -12) hitEffect = "hit";
+    else if (dIntegrity < 0) hitEffect = "guarded";
+    flashDamage = dMorale < 0;
+  }
+
+  // 対象の上に飛ばす数値。何がどれだけ動いたかを一目で返す
+  function damagePops() {
+    if (!pendingPops.length) return "";
+    return '<div class="pop-layer">' + pendingPops.map(function (pop, i) {
+      return '<span class="damage-pop ' + pop.kind + '" style="--pop-delay:' + (i * 90) + 'ms">' +
+        escapeHTML(pop.text) + (pop.note ? '<small>' + escapeHTML(pop.note) + "</small>" : "") + "</span>";
+    }).join("") + "</div>";
   }
 
   function battleActionButtons() {
@@ -507,9 +566,10 @@
       ? '<img class="target-image' + (hitEffect ? " " + hitEffect : "") + '" src="' + escapeHTML(targetPath) + '" alt="" data-target>'
       : '<div class="target-fallback' + (hitEffect ? " " + hitEffect : "") + '"></div>';
     screen.innerHTML =
-      '<section class="battle-screen">' +
+      '<section class="battle-screen' + (flashDamage ? ' damaged' : '') + '">' +
         '<div class="battle-visual' + (hitEffect === "hit-big" ? " shock" : "") + '" style="--battle-art:' + backgroundStyle(battleDefinition.background) + '">' +
           targetMarkup +
+          damagePops() +
           '<div class="battle-target-label"><strong>' + escapeHTML(battleDefinition.target) +
           '</strong><span>対処対象：機械／システム</span></div>' +
         "</div>" +
@@ -518,10 +578,10 @@
           "</p><h1>" + escapeHTML(battleDefinition.title) + '</h1></div><div class="turn-counter">TURN ' +
           battleState.turn + " / " + battleDefinition.turnLimit + "</div></div>" +
           '<div class="gauges">' +
-            gauge("RAML士気", gameState.params.raml_morale, "morale") +
-            gauge("完全性", battleState.node_integrity, "integrity") +
-            gauge("制御", battleState.node_control, "") +
-            gauge("進行", battleState.node_progress, "progress") +
+            gauge("RAML士気", gameState.params.raml_morale, "morale", prevGauges && prevGauges.morale) +
+            gauge("完全性", battleState.node_integrity, "integrity", prevGauges && prevGauges.integrity) +
+            gauge("制御", battleState.node_control, "", prevGauges && prevGauges.control) +
+            gauge("進行", battleState.node_progress, "progress", prevGauges && prevGauges.progress) +
           "</div>" +
           '<div class="phase-strip">行動枠 ' + battleState.slotsUsed + " / " + Engine.slotLimit(battleState) +
           "　｜　GADGET解析 " + gameState.params.gadget_analysis +
@@ -547,7 +607,16 @@
         "</div>" +
       "</section>";
     wireImageFallbacks();
-    hitEffect = null; // 演出は一度きり
+    // 演出は一度きり。次の描画に持ち越さない
+    hitEffect = null;
+    pendingPops = [];
+    flashDamage = false;
+    prevGauges = {
+      morale: gameState.params.raml_morale,
+      integrity: battleState.node_integrity,
+      control: battleState.node_control,
+      progress: battleState.node_progress
+    };
     // 直近の1手が必ず見えるようにログを末尾へ送る
     const logBox = document.getElementById("battle-log");
     if (logBox) logBox.scrollTop = logBox.scrollHeight;
@@ -556,20 +625,16 @@
 
     screen.querySelectorAll("[data-action]").forEach(function (button) {
       button.addEventListener("click", function () {
-        const before = battleState.log.length;
-        const beforeIntegrity = battleState.node_integrity;
-        const beforeSync = battleState.syncHit;
+        const snap = {
+          integrity: battleState.node_integrity,
+          control: battleState.node_control,
+          morale: gameState.params.raml_morale,
+          sync: battleState.syncHit,
+          counter: battleState.counterHit
+        };
         const result = Engine.performAction(battleDefinition, battleState, gameState.params, button.dataset.action);
         if (!result.ok) { toast(result.reason); return; }
-        // 手応えを画で返す：隙を突いた一撃は大きく、受け止められた一撃は硬く
-        const dealt = beforeIntegrity - result.local.node_integrity;
-        if (result.local.syncHit > beforeSync) hitEffect = "hit-big";
-        else if (dealt >= 12) hitEffect = "hit";
-        else if (dealt > 0) hitEffect = "guarded";
-        // その一手で何が動いたかを、ログを見に行かなくても分かるようにする
-        result.local.log.slice(before).filter(function (item) {
-          return /→/.test(item) || new RegExp("^" + battleDefinition.target + "：").test(item);
-        }).slice(0, 2).forEach(toast);
+        buildFeedback(snap, result);
         battleState = result.local;
         gameState.params = result.params;
         checkBattleState();
