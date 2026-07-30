@@ -25,6 +25,10 @@
   let pendingPops = [];
   let prevGauges = null;
   let flashDamage = false;
+  let endingIndex = 0;
+  let endingLines = [];
+  let endingVariant = null;
+  let endingStored = null;
   let currentScene = null;
   let settings = loadSettings();
 
@@ -143,6 +147,7 @@
     saveState();
     advIndex = 0;
     pendingLines = null;
+    endingIndex = 0;
     // 決着済みの戦闘シーンへ再入場した場合は次のシーンへ送る（再戦・パラメータ稼ぎの防止）
     if (currentScene.battle && Array.isArray(gameState.flags.battles_done)
       && gameState.flags.battles_done.includes(currentScene.battle)) {
@@ -344,24 +349,73 @@
     if (!gameState.flags.dex.includes(endDex)) gameState.flags.dex.push(endDex);
     saveState();
 
-    let release = "";
-    if (Object.prototype.hasOwnProperty.call(variant, "releaseNote")) {
-      release = '<div class="release-note"><strong>リリースノート最終行</strong><br>' +
-        (variant.releaseNote ? escapeHTML("「" + variant.releaseNote + "」") : "（空欄）") +
-        '<br><br><strong>署名</strong><br>' + (variant.signature ? escapeHTML(variant.signature) : "（空欄）") + "</div>";
+    endingVariant = variant;
+    endingStored = stored;
+    endingLines = variant.lines || (variant.body || "").split("\n")
+      .map(function (t) { return t.trim(); })
+      .filter(Boolean)
+      .map(function (t) { return { text: t }; });
+    if (scene.prelude) endingLines.unshift({ text: scene.prelude, stage: true });
+    renderEndingStep(scene);
+  }
+
+  // scenario-data の line()／stage() と、body 分割の両方を受ける
+  function endingText(item) {
+    if (!item) return "";
+    return item.speaker ? item.speaker + "「" + item.text + "」" : item.text;
+  }
+  function endingSpoken(item) {
+    if (!item || item.stage) return false;
+    return item.speaker ? true : /^[^「]+「/.test(item.text || "");
+  }
+
+  // 幕引きは一気に読ませない。1行ずつ送って、最後に締めの一枚を出す
+  function renderEndingStep(scene) {
+    viewMode = "ending";
+    const variant = endingVariant;
+    const total = endingLines.length;
+    const done = endingIndex >= total;
+    const item = endingLines[Math.min(endingIndex, total - 1)] || { text: "" };
+    const spoken = endingSpoken(item);
+
+    let closing = "";
+    if (done) {
+      if (Object.prototype.hasOwnProperty.call(variant, "releaseNote")) {
+        closing += '<div class="release-note"><strong>リリースノート最終行</strong><br>' +
+          (variant.releaseNote ? escapeHTML("「" + variant.releaseNote + "」") : "（空欄のまま閉じられた）") +
+          '<br><br><strong>署名</strong><br>' +
+          (variant.signature ? escapeHTML(variant.signature) : "（空欄）") + "</div>";
+      }
+      closing += '<button class="primary-button" id="ending-next">次へ</button>';
     }
+
     screen.innerHTML =
-      '<section class="ending-screen">' +
+      '<section class="ending-screen' + (done ? " done" : " reading") + '" style="--scene-art:' +
+        backgroundStyle(scene.background) + '">' +
         '<article class="ending-card">' +
-          '<p class="eyebrow">' + escapeHTML(variant.id) + " / " + escapeHTML(stored.toUpperCase()) + "</p>" +
+          '<p class="eyebrow">' + escapeHTML(variant.id) + " / " + escapeHTML(endingStored.toUpperCase()) + "</p>" +
           "<h1>" + escapeHTML(variant.title) + "</h1>" +
-          (scene.prelude ? '<p class="ending-body stage-text">' + escapeHTML(scene.prelude) + "</p>" : "") +
-          '<p class="ending-body">' + escapeHTML(variant.body) + "</p>" +
-          release +
-          '<button class="primary-button" id="ending-next">次へ</button>' +
+          (done
+            ? '<div class="ending-recap">' + endingLines.map(function (l) {
+                return '<p class="' + (endingSpoken(l) ? "ending-line" : "ending-stage") + '">' +
+                  escapeHTML(endingText(l)) + "</p>";
+              }).join("") + "</div>"
+            : '<p class="ending-body ' + (spoken ? "ending-line" : "ending-stage") + '">' +
+              escapeHTML(endingText(item)) + "</p>") +
+          closing +
+          (done ? "" : '<div class="ending-progress">' + (endingIndex + 1) + " / " + total +
+            '　<span class="advance-hint">クリック / Enter</span></div>') +
         "</article>" +
       "</section>";
-    document.getElementById("ending-next").addEventListener("click", function () { advanceFromScene(scene); });
+
+    if (done) {
+      document.getElementById("ending-next").addEventListener("click", function () { advanceFromScene(scene); });
+    } else {
+      screen.querySelector(".ending-screen").addEventListener("click", function () {
+        endingIndex += 1;
+        renderEndingStep(scene);
+      });
+    }
   }
 
   function showBattleTutorial() {

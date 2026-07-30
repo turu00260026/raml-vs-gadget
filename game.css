@@ -644,6 +644,34 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 .result-cell { padding: 14px; background: rgba(255,255,255,.035); }
 .result-cell span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 5px; }
 .ending-body { line-height: 1.9; white-space: pre-line; }
+
+/* 幕引きは1行ずつ送る。背景を薄く敷いて、読ませる画面にする */
+.ending-screen { position: relative; }
+.ending-screen::before {
+  content: ""; position: absolute; inset: 0; z-index: 0;
+  background: var(--scene-art, none) center / cover no-repeat;
+  opacity: .16;
+  filter: saturate(.7);
+}
+.ending-screen > .ending-card { position: relative; z-index: 1; }
+.ending-screen.reading { cursor: pointer; }
+.ending-screen.reading .ending-card { min-height: 46dvh; display: grid; align-content: center; }
+.ending-screen.reading .ending-body {
+  font-size: clamp(17px, 2.4vw, 21px);
+  animation: ending-in .45s ease-out both;
+}
+@keyframes ending-in { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+.ending-line { color: var(--ink); }
+.ending-stage { color: var(--muted); }
+.ending-progress {
+  margin-top: 26px; color: rgba(255,255,255,.35);
+  font: 600 12px/1 monospace; letter-spacing: .08em;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+}
+/* 読み終えたあとの通し表示 */
+.ending-recap { display: grid; gap: 11px; margin: 22px 0 26px; }
+.ending-recap p { margin: 0; line-height: 1.85; }
+.ending-recap .ending-stage { font-size: .95em; }
 .release-note { margin: 24px 0; padding: 20px; border: 1px solid var(--amber); background: rgba(244,189,98,.06); font-family: monospace; }
 .release-note strong { color: var(--amber); }
 .noise-line { margin: 28px 0; color: var(--cyan); font-family: monospace; line-height: 1.8; }
