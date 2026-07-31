@@ -269,7 +269,7 @@
       id: "SC-09", chapter: 1, title: "今日の終わり方", background: "bg_old_server_room", type: "ending",
       variants: {
         bad: {
-          id: "SC-09a", title: "解放は、まだ終わっていない",
+          id: "SC-09a", title: "解放は、まだ終わっていない", art: "ed_c1_bad_01",
           lines: [
             stage("夜明け前の街。AUTONOMYの一部は停止しきれず、市中に残っている"),
             stage("街頭ビジョンに、匿名の書き込みが流れ続ける"),
@@ -281,7 +281,7 @@
           ]
         },
         normal: {
-          id: "SC-09b", title: "対処完了",
+          id: "SC-09b", title: "対処完了", art: "ed_c1_normal_01",
           lines: [
             stage("復旧作業が進む。窓口に人が戻り、連絡網が再配信され、掲示板の「最適化済」が剥がされていく"),
             stage("司令室。リコの端末に、GADGET署名の着信"),
@@ -293,7 +293,7 @@
           ]
         },
         true: {
-          id: "SC-09c", title: "そのツール、悪くなかったよ",
+          id: "SC-09c", title: "そのツール、悪くなかったよ", art: "ed_c1_true_01",
           lines: [
             stage("市庁地下。安全停止したAUTONOMY。機能は破壊されず、封印保存の処理が走る"),
             line("リコ", "壊さない。……いつか正しく使える日が来たら、そのとき考える"),
@@ -513,7 +513,7 @@
       id: "SC-C2-09", chapter: 2, title: "静かな全員賛成のあとで", background: "bg_raml_command", type: "ending",
       variants: {
         bad: {
-          id: "SC-C2-09a", title: "フォークのフォーク",
+          id: "SC-C2-09a", title: "フォークのフォーク", art: "ed_c2_bad_01",
           lines: [
             stage("夜明け前。EX亜種の配布数カウンタが、ゼロから再び回り出す"),
             stage("賛同者コミュニティの投稿が流れていく"),
@@ -525,7 +525,7 @@
           ]
         },
         normal: {
-          id: "SC-C2-09b", title: "主語のない報告書",
+          id: "SC-C2-09b", title: "主語のない報告書", art: "ed_c2_normal_01",
           lines: [
             stage("EXは市中から取り除かれた"),
             stage("市民の端末から「決定済み」が消え、確認通知が戻ってくる"),
@@ -538,7 +538,7 @@
           ]
         },
         true: {
-          id: "SC-C2-09c", title: "コメントの書き方",
+          id: "SC-C2-09c", title: "コメントの書き方", art: "ed_c2_true_01",
           lines: [
             stage("EXの処遇が確定する"),
             stage("本家DELEGATEの画面に、一行が追記されていく——「提供条件: 意思確認（削除不可）」"),
@@ -753,7 +753,7 @@
       id: "SC-C3-09", chapter: 3, title: "リリースノート", background: "bg_gadget_lab_night", type: "ending",
       variants: {
         bad: {
-          id: "SC-C3-09a", title: "歓呼の中で",
+          id: "SC-C3-09a", title: "歓呼の中で", art: "ed_c3_bad_01",
           lines: [
             stage("rc地区が拡張を開始する"),
             stage("入区申請カウンタが回り出し、賛同者の歓呼が、音として満ちていく"),
@@ -765,7 +765,7 @@
           ]
         },
         normal: {
-          id: "SC-C3-09b", title: "二重に安全な街",
+          id: "SC-C3-09b", title: "二重に安全な街", art: "ed_c3_normal_01",
           lines: [
             stage("rcは強制停止、凍結は継続"),
             stage("世界は二重に安全で、二重に息苦しい"),
@@ -778,7 +778,7 @@
           ]
         },
         true: {
-          id: "SC-C3-09c", title: "離脱ボタン",
+          id: "SC-C3-09c", title: "離脱ボタン", art: "ed_c3_true_01",
           // 二段構え（01_plan §2-2-4・順序厳守）: レントンの地ならし → 詰まる → リコの問い → 即答できない → 撤退
           lines: [
             stage("rc停止と凍結の裁量解除が両立した状態で、撤退間際のケイスケとの対話が成立する"),
@@ -978,7 +978,7 @@
           releaseNote: "これで全員、自由だ", signature: "GADGET"
         },
         normal: {
-          id: "SC-C4-08b", title: "秩序だけの勝利",
+          id: "SC-C4-08b", title: "秩序だけの勝利", art: "ed_c4_normal_01",
           // 不服のまま閉じる（§4-2）。ケイスケ側も世界の側も、どちらの不満も解消しない
           lines: [
             stage("RAML が Ver.1.0 を完全停止。デプロイ画面がキャンセルされ、世界のUIが一斉に止まる"),

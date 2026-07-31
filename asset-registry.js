@@ -37,9 +37,20 @@
     ["ov_noise_glitch_01", "overlay", "overlays/ov_noise_glitch_01.png"],
     ["bg_shopping_street_day", "background", "backgrounds/bg_shopping_street_day.webp"],
     ["bg_city_crossing_dusk", "background", "backgrounds/bg_city_crossing_dusk.webp"],
-    ["ev_c4_admin_chair_01", "event_cg", "cutins/ev_c4_admin_chair_01.png"],
-    ["ev_c4_handshake_01", "event_cg", "cutins/ev_c4_handshake_01.png"],
-    ["ev_c4_epilogue_return_01", "event_cg", "cutins/ev_c4_epilogue_return_01.png"]
+    ["ev_c4_admin_chair_01", "event_cg", "cutins/ev_c4_admin_chair_01.webp"],
+    ["ev_c4_handshake_01", "event_cg", "cutins/ev_c4_handshake_01.webp"],
+    ["ev_c4_epilogue_return_01", "event_cg", "cutins/ev_c4_epilogue_return_01.webp"],
+    // 各章の幕引きCG（bad / normal / true）。第4章の bad・true は上の ev_c4_* を使う
+    ["ed_c1_bad_01", "event_cg", "cutins/ed_c1_bad_01.webp"],
+    ["ed_c1_normal_01", "event_cg", "cutins/ed_c1_normal_01.webp"],
+    ["ed_c1_true_01", "event_cg", "cutins/ed_c1_true_01.webp"],
+    ["ed_c2_bad_01", "event_cg", "cutins/ed_c2_bad_01.webp"],
+    ["ed_c2_normal_01", "event_cg", "cutins/ed_c2_normal_01.webp"],
+    ["ed_c2_true_01", "event_cg", "cutins/ed_c2_true_01.webp"],
+    ["ed_c3_bad_01", "event_cg", "cutins/ed_c3_bad_01.webp"],
+    ["ed_c3_normal_01", "event_cg", "cutins/ed_c3_normal_01.webp"],
+    ["ed_c3_true_01", "event_cg", "cutins/ed_c3_true_01.webp"],
+    ["ed_c4_normal_01", "event_cg", "cutins/ed_c4_normal_01.webp"]
   ].map(function (row) {
     return { id: row[0], type: row[1], file: row[2], status: "approved" };
   });
