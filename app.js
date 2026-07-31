@@ -139,6 +139,7 @@
   }
 
   function openCurrentScene() {
+    finishTyping();
     currentScene = Scenario.getScene(gameState.scene);
     if (!currentScene) {
       gameState.scene = Scenario.getChapter(gameState.chapter).firstScene;
@@ -166,6 +167,20 @@
       if (!gameState.flags.dex.includes(dexId)) gameState.flags.dex.push(dexId);
       if (currentScene.noiseIndex === 3) Series.registerSeriesTitles(gameState);
       saveState();
+    }
+    // 選択済みのまま閉じていた場合は、選択肢を出し直さず差分の会話から再開する
+    if (gameState.pending && gameState.pending.scene === currentScene.id && currentScene.choice) {
+      const chosen = currentScene.choice.options.find(function (item) {
+        return item.id === gameState.pending.choice;
+      });
+      if (chosen) {
+        const follow = (chosen.diff || []).concat(currentScene.after || []);
+        if (follow.length) pendingLines = follow;
+      } else {
+        gameState.pending = null;
+      }
+    } else if (gameState.pending) {
+      gameState.pending = null;
     }
     renderAdv();
   }
@@ -290,6 +305,9 @@
           // ▼差分 →（あれば）合流後の行を続けて見せてから次へ
           const follow = (selected.diff || []).concat(scene.after || []);
           if (follow.length) {
+            // 差分の会話を読んでいる途中で閉じても選択が残るよう、ここで保存する
+            gameState.pending = { scene: scene.id, choice: selected.id };
+            saveState();
             pendingLines = follow;
             advIndex = 0;
             renderAdv();
@@ -306,6 +324,8 @@
   }
 
   function advanceLine() {
+    // 送り途中のクリックは「まず全文表示」。もう一度で次の行へ
+    if (typingActive()) { finishTyping(); return; }
     if (advIndex < activeLines().length) {
       advIndex += 1;
       renderAdv();
@@ -313,6 +333,7 @@
   }
 
   function advanceFromScene(scene) {
+    gameState.pending = null;
     const nextId = Scenario.getNextSceneId(scene.id);
     if (!nextId) {
       saveState();
@@ -391,8 +412,9 @@
     }
 
     screen.innerHTML =
-      '<section class="ending-screen' + (done ? " done" : " reading") + '" style="--scene-art:' +
-        backgroundStyle(scene.background) + '">' +
+      '<section class="ending-screen' + (done ? " done" : " reading") +
+        (variant.art ? " cinematic" : "") + '" style="--scene-art:' +
+        backgroundStyle(variant.art || scene.background) + '">' +
         '<article class="ending-card">' +
           '<p class="eyebrow">' + escapeHTML(variant.id) + " / " + escapeHTML(endingStored.toUpperCase()) + "</p>" +
           "<h1>" + escapeHTML(variant.title) + "</h1>" +
@@ -410,9 +432,12 @@
       "</section>";
 
     if (done) {
+      finishTyping();
       document.getElementById("ending-next").addEventListener("click", function () { advanceFromScene(scene); });
     } else {
+      startTyping(screen.querySelector(".ending-body"), endingText(item));
       screen.querySelector(".ending-screen").addEventListener("click", function () {
+        if (typingActive()) { finishTyping(); return; }
         endingIndex += 1;
         renderEndingStep(scene);
       });
@@ -928,8 +953,18 @@
           '<section class="archive-panel"><h2>回想</h2><ul class="archive-list">' +
             Scenario.subEvents.map(function (item) {
               const unlocked = state.flags.sub_events.includes(item.id);
-              return '<li class="archive-item ' + (unlocked ? "unlocked" : "") + '">' +
-                escapeHTML(unlocked ? item.id + "　" + item.title : item.id + "　未解放") + "</li>";
+              if (!unlocked) {
+                return '<li class="archive-item">' + escapeHTML(item.id + "　未解放") + "</li>";
+              }
+              // 解放済みは本文まで読める（題名だけ出して終わりにしない）
+              const body = (item.lines || []).map(function (l) {
+                return '<p class="' + (l.stage ? "recall-stage" : "recall-line") + '">' +
+                  (l.speaker ? '<span class="recall-speaker">' + escapeHTML(l.speaker) + "</span>" : "") +
+                  escapeHTML(l.text) + "</p>";
+              }).join("");
+              return '<li class="archive-item unlocked">' +
+                '<details><summary>' + escapeHTML(item.id + "　" + item.title) + "</summary>" +
+                '<div class="recall-body">' + body + "</div></details></li>";
             }).join("") + "</ul></section>" +
           '<section class="archive-panel wide"><h2>noise_log断片</h2><ul class="archive-list">' + noiseItems + "</ul>" +
             '<div class="release-note"><strong>未分類の物語構造</strong><br>' +

@@ -36,7 +36,10 @@
     ["ov_node_space_01", "overlay", "overlays/ov_node_space_01.png"],
     ["ov_noise_glitch_01", "overlay", "overlays/ov_noise_glitch_01.png"],
     ["bg_shopping_street_day", "background", "backgrounds/bg_shopping_street_day.webp"],
-    ["bg_city_crossing_dusk", "background", "backgrounds/bg_city_crossing_dusk.webp"]
+    ["bg_city_crossing_dusk", "background", "backgrounds/bg_city_crossing_dusk.webp"],
+    ["ev_c4_admin_chair_01", "event_cg", "cutins/ev_c4_admin_chair_01.png"],
+    ["ev_c4_handshake_01", "event_cg", "cutins/ev_c4_handshake_01.png"],
+    ["ev_c4_epilogue_return_01", "event_cg", "cutins/ev_c4_epilogue_return_01.png"]
   ].map(function (row) {
     return { id: row[0], type: row[1], file: row[2], status: "approved" };
   });

@@ -502,6 +502,9 @@
     }
     local.node_integrity = SERIES.clamp(local.node_integrity + integrityDelta);
     local.node_control = SERIES.clamp(local.node_control + controlDelta);
+    // 進行のリスク（傾聴）と士気の増減（トリアージ）は、守り／隙の倍率とは無関係に必ず適用する
+    if (action.progress) local.node_progress = SERIES.clamp(local.node_progress + action.progress);
+    if (action.morale) applyMorale(local, params, action.morale);
 
     const sc = script(definition);
     const interrupt = sc.interrupt || {};

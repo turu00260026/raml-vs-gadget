@@ -147,7 +147,10 @@
         ed_c3: null,
         ed_final: null
       },
-      battle_records: []
+      battle_records: [],
+      // 選択直後（差分の会話を読んでいる最中）に閉じても選択が消えないよう、
+      // 「どの場面で何を選んだか」だけを保存しておく
+      pending: null
     };
   }
 
@@ -175,6 +178,9 @@
       const value = input.endings && input.endings[key];
       clean.endings[key] = ["bad", "normal", "true"].includes(value) ? value : null;
     });
+    if (input.pending && typeof input.pending.scene === "string" && typeof input.pending.choice === "string") {
+      clean.pending = { scene: input.pending.scene, choice: input.pending.choice };
+    }
     clean.battle_records = Array.isArray(input.battle_records)
       ? input.battle_records.filter(function (record) {
           return record && typeof record.battle_id === "string";

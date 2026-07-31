@@ -679,6 +679,15 @@ button:focus-visible, select:focus-visible, input:focus-visible {
   filter: saturate(.7);
 }
 .ending-screen > .ending-card { position: relative; z-index: 1; }
+.ending-screen.cinematic::before {
+  opacity: .76;
+  filter: saturate(.9) brightness(.68);
+}
+.ending-screen.cinematic > .ending-card {
+  background: rgba(7, 16, 20, .86);
+  backdrop-filter: blur(5px);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .48);
+}
 .ending-screen.reading { cursor: pointer; }
 .ending-screen.reading .ending-card { min-height: 46dvh; display: grid; align-content: center; }
 .ending-screen.reading .ending-body {
@@ -710,6 +719,13 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 .archive-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .archive-item { padding: 10px 12px; background: rgba(255,255,255,.03); color: var(--muted); font-size: 14px; }
 .archive-item.unlocked { color: var(--ink); border-left: 2px solid var(--amber); }
+.archive-item summary { cursor: pointer; }
+.archive-item summary::marker { color: var(--amber); }
+.recall-body { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.08); }
+.recall-line, .recall-stage { margin: 0 0 8px; line-height: 1.7; }
+.recall-line:last-child, .recall-stage:last-child { margin-bottom: 0; }
+.recall-stage { color: var(--muted); font-size: 13px; }
+.recall-speaker { display: block; color: var(--cyan); font-size: 12px; letter-spacing: .08em; }
 
 .modal {
   width: min(560px, calc(100% - 24px));

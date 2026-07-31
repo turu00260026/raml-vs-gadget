@@ -958,7 +958,7 @@
       prelude: "世界のUIが、一斉に切り替わる。——その一瞬、統一された画面のうち一つだけが、まるで別の作品のような絵柄に化けて、すぐに元へ戻る。誰も気づかない。",
       variants: {
         bad: {
-          id: "SC-C4-08a", title: "自由の暴走",
+          id: "SC-C4-08a", title: "自由の暴走", art: "ev_c4_admin_chair_01",
           // 静かな転落（chapter04/06_script.md SC-C4-08a）。高笑いも悪堕ち記号も使わず、無音で描く
           lines: [
             stage("最終同期が完了する。Ver.1.0 が、世界OSとして走り出した"),
@@ -995,7 +995,7 @@
           releaseNote: "", signature: ""
         },
         true: {
-          id: "SC-C4-08c", title: "自由と秩序の握手",
+          id: "SC-C4-08c", title: "自由と秩序の握手", art: "ev_c4_handshake_01",
           // 握手の主人公性（protagonist_policy §5-1・順序厳守）:
           // ショウ壊さない一撃 → ノリ哲学の手渡し → レントン手を読む → レントン最初に手を差し出す → リコ連名の契約
           lines: [
@@ -1023,7 +1023,7 @@
       }
     },
     "SC-C4-09": {
-      id: "SC-C4-09", chapter: 4, title: "——", background: "bg_return_road_dawn",
+      id: "SC-C4-09", chapter: 4, title: "——", background: "ev_c4_epilogue_return_01",
       lines: [
         line("SYSTEM", "四人は、それぞれの方向へ帰っていく。"),
         line("SYSTEM", "無人の観測室。モニタが一度だけ、未分類の波形を検知する。"),
@@ -1040,19 +1040,69 @@
     }
   };
 
+  // 回想の本文。第2・3章は 06_script.md 付録B、第1章は 03_battle_system.md §8-3 の題材による。
+  // 記録室で読ませるため、演出記号は地の文に直してある
   const SUB_EVENTS = [
-    { id: "SUB-01", chapter: 1, title: "リコ「連絡網のその後」", threshold: 20 },
-    { id: "SUB-02", chapter: 1, title: "ノリ「休憩命令」", threshold: 25 },
-    { id: "SUB-03", chapter: 1, title: "レントン「三週間」", threshold: 30 },
-    { id: "SUB-04", chapter: 1, title: "ショウ「簡単じゃない方」", threshold: 35 },
-    { id: "SUB-C2-01", chapter: 2, title: "リコ「もう一度、話し合いで」", threshold: 35 },
-    { id: "SUB-C2-02", chapter: 2, title: "ノリ「取り消した週末」", threshold: 40 },
-    { id: "SUB-C2-03", chapter: 2, title: "レントン「決め直された計画」", threshold: 45 },
-    { id: "SUB-C2-04", chapter: 2, title: "ショウ「手書きのメモ帳」", threshold: 50 },
-    { id: "SUB-C3-01", chapter: 3, title: "リコ「私の名前で」", threshold: 50 },
-    { id: "SUB-C3-02", chapter: 3, title: "ノリ「週末の道具」", threshold: 55 },
-    { id: "SUB-C3-03", chapter: 3, title: "レントン「最初の一歩」", threshold: 60 },
-    { id: "SUB-C3-04", chapter: 3, title: "ショウ「手書きのメモ帳」", threshold: 65 }
+    { id: "SUB-01", chapter: 1, title: "リコ「連絡網のその後」", threshold: 20, lines: [
+      stage("私用端末の画面。止まっていた連絡網に、ひとつずつ返事が戻ってきている"),
+      line("リコ", "……止まっていた三日分。誰も、責めてこなかった", "rico", "neutral"),
+      stage("既読の印が、ばらばらの時刻で灯る。急ぐ人も、遅れる人もいる")
+    ] },
+    { id: "SUB-02", chapter: 1, title: "ノリ「休憩命令」", threshold: 25, lines: [
+      stage("休憩室。誰かがノリの日焼けした腕に触れかけて、途中で手を引っこめる"),
+      line("ノリ", "……聞かないんですね", "nori", "tanned_analysis"),
+      stage("聞かれなかった問いは、そのまま流れていった")
+    ] },
+    { id: "SUB-03", chapter: 1, title: "レントン「三週間」", threshold: 30, lines: [
+      stage("通話中の画面。相手は、置いてきた予定のある人"),
+      line("レントン", "三週間、空いてもうたな。……ほんでも、ゼロにはなってへんよ", "renton", "neutral"),
+      stage("通話が切れたあと、少しだけ画面を見ている")
+    ] },
+    { id: "SUB-04", chapter: 1, title: "ショウ「簡単じゃない方」", threshold: 35, lines: [
+      stage("待機室。ショウが袖についた動物の毛を、指先でつまんで取る"),
+      line("ショウ", "……簡単な方は、誰でもやる", "sho", "neutral"),
+      stage("つまんだものを、そっとポケットにしまった")
+    ] },
+    { id: "SUB-C2-01", chapter: 2, title: "リコ「もう一度、話し合いで」", threshold: 35, lines: [
+      stage("保護者会アプリ。「全会一致」が取り消され、「再審議: 日程調整中」と表示されている"),
+      line("リコ", "……全員の都合を聞いて、揉めて、長引くやつ。やりましょう、それを", "rico", "neutral"),
+      stage("返信が一件、また一件と、バラバラの時刻に灯っていく")
+    ] },
+    { id: "SUB-C2-02", chapter: 2, title: "ノリ「取り消した週末」", threshold: 40, lines: [
+      stage("ノリの私用端末。「辞退代行」を取り消した予定の、当日の朝。持ち物の影だけが画面の端に見える"),
+      line("ノリ", "……代行されたら、これの何が残るんですかね", "nori", "neutral"),
+      stage("玄関を出る音。予定の中身は、最後まで映らない")
+    ] },
+    { id: "SUB-C2-03", chapter: 2, title: "レントン「決め直された計画」", threshold: 45, lines: [
+      stage("リハビリ室。手入力の計画表が、ところどころ空欄のまま置かれている"),
+      line("患者", "空欄、まだ決めてないんです。……決めてないって、決めました"),
+      line("レントン", "上等やん。空欄も、本人のもんや", "renton", "neutral")
+    ] },
+    { id: "SUB-C2-04", chapter: 2, title: "ショウ「手書きのメモ帳」", threshold: 50, lines: [
+      stage("隊の待機室。ショウが、角の丸くなった小さなメモ帳に鉛筆で何かを書いている"),
+      stage("ページの中身は見えない。書き終えて、胸ポケットにしまう"),
+      line("ショウ", "……忘れないうちに、な", "sho", "neutral")
+    ] },
+    { id: "SUB-C3-01", chapter: 3, title: "リコ「私の名前で」", threshold: 50, lines: [
+      stage("司令室。裁量解除の書類。責任欄の前で、ペンを持つ手が一度止まる"),
+      line("リコ", "……止めるのは、みんなで決めた。緩めるのは、私の名前で。——それで、いい", "rico", "neutral"),
+      stage("署名した一枚が、ファイルの一番上に重なった")
+    ] },
+    { id: "SUB-C3-02", chapter: 3, title: "ノリ「週末の道具」", threshold: 55, lines: [
+      stage("ノリの手元。週末に使う道具を、布で拭いている。何の道具かは見えない"),
+      line("ノリ", "……止める道具と、続ける道具。手入れは、どっちも要るんですよね", "nori", "tanned_analysis"),
+      stage("道具を、いつもの場所にしまう。日焼けした手の甲が、画面の端に映る")
+    ] },
+    { id: "SUB-C3-03", chapter: 3, title: "レントン「最初の一歩」", threshold: 60, lines: [
+      stage("rc地区の境界。退区手続きの画面を通り抜けて、一人の住民が外へ出る。最初の一歩"),
+      line("住民", "……外の空気、こんな匂いでしたっけ"),
+      line("レントン", "ゆっくりでええんよ。行って、帰ってくる。——それが、回復や", "renton", "neutral")
+    ] },
+    { id: "SUB-C3-04", chapter: 3, title: "ショウ「手書きのメモ帳」", threshold: 65, lines: [
+      stage("隊の待機室。ショウが、角の丸くなったメモ帳に鉛筆で何か書いている。内容は見えない"),
+      stage("書き終えて、胸ポケットにしまう"),
+      line("ショウ", "……壊さずに済んだ日は、書いとくんだ。忘れないように", "sho", "neutral")
+    ] }
   ];
 
   const PORTRAIT_CUES = {
