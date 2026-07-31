@@ -101,6 +101,7 @@
     "SC-02": {
       id: "SC-02", chapter: 1, title: "手続きが、消えた夜", background: "bg_riko_home_night",
       lines: [
+        stage("夕暮れの住宅街。保育園帰りの荷物を提げて、リコが帰ってくる", "ev_riko_homecoming_01"),
         line("リコ", "……連絡網、今日一件も来てない。おたより、来る日なのに", "rico", "concern"),
         stage("画面表示「本連絡網は統合されました。今後の配信は最適化されます」"),
         line("リコ", "『非効率なので統合しました』って、誰が", "rico", "alert"),
@@ -257,7 +258,7 @@
     "SC-08": {
       id: "SC-08", chapter: 1, title: "解放者の言い分", background: "bg_old_server_room",
       lines: [
-        stage("市庁地下、旧サーバー室。中央にAUTONOMY中枢。その上に腰掛ける人影"),
+        stage("市庁地下、旧サーバー室。中央にAUTONOMY中枢。その上に腰掛ける人影", "keisuke_robo_clean"),
         line("ノリ", "照合。……GADGET首魁、ケイスケ。本人です", "nori", "tanned_analysis"),
         line("リコ", "……資料の印象と、だいぶ違う", "rico", "concern"),
         line("ケイスケ", "かわいいだろ。なりたい姿で、なりたいように生きてる。——それがボクの言う『自由』だ。名刺代わりにはなったかな", "keisuke", "neutral")
@@ -314,7 +315,7 @@
       id: "SC-10", chapter: 1, title: "noise_log.0", background: "bg_return_road_dawn", type: "noise", noiseIndex: 0,
       lines: [
         stage("AUTONOMY最終ログの閲覧画面。正常な停止記録がスクロールしていく"),
-        stage("最後の一行だけ、表示形式そのものが崩れる。ログではない「ト書きのような一文」が流れ、読み切る前に消える"),
+        stage("最後の一行だけ、表示形式そのものが崩れる。ログではない「ト書きのような一文」が流れ、読み切る前に消える", "ov_noise_glitch_01"),
         line("SYSTEM", "「——だが、それはまた別の物語。」"),
         line("ノリ", "……今の、見ました？", "nori", "tanned_analysis"),
         line("リコ", "もう一回出せる？", "rico", "concern"),

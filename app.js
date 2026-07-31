@@ -844,9 +844,18 @@
           return '<p class="' + (spoken ? "aftermath-line" : "aftermath-stage") + '">' + escapeHTML(text) + "</p>";
         }).join("") + "</div>"
       : "";
+    // 決着後の対象の姿（停止・待機・組み伏せ）。素材のある相手だけ映す
+    const resolvedId = battleDefinition.assetResolved;
+    const resolvedPath = (!record.retreated && resolvedId) ? Assets.assetPath(resolvedId) : null;
+    const resolvedArt = resolvedPath
+      ? '<div class="result-visual"><img src="' + escapeHTML(resolvedPath) + '" alt="" data-target>' +
+        '<span class="result-visual-label">' + escapeHTML(battleDefinition.target) + "　" +
+        escapeHTML(label) + "</span></div>"
+      : "";
     screen.innerHTML =
       '<section class="result-screen"><article class="result-card">' +
         '<p class="eyebrow">BATTLE RECORD / ' + escapeHTML(record.battle_id) + "</p>" +
+        resolvedArt +
         "<h1>" + escapeHTML(label) + "</h1>" +
         (timedOut ? '<p class="phase-strip">ターン上限時の規定により確定</p>' : "") +
         aftermath +

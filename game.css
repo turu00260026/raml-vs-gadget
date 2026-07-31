@@ -665,6 +665,16 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 .aftermath-line:last-child { margin-bottom: 0; }
 .aftermath-stage { margin: 0 0 12px; color: var(--muted); font-size: 14px; line-height: 1.8; }
 .aftermath-stage:last-child { margin-bottom: 0; }
+/* 決着後の対象。結果画面の頭に一枚だけ置く */
+.result-visual { position: relative; margin: 0 0 18px; text-align: center; }
+.result-visual img {
+  max-width: min(100%, 320px); max-height: 34dvh; object-fit: contain;
+  filter: saturate(.55) brightness(.85);
+}
+.result-visual-label {
+  display: block; margin-top: 6px; color: var(--muted);
+  font-size: 12px; letter-spacing: .1em;
+}
 .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 24px 0; }
 .result-cell { padding: 14px; background: rgba(255,255,255,.035); }
 .result-cell span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 5px; }
