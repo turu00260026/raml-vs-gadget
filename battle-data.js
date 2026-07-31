@@ -53,47 +53,47 @@
     return Object.assign({ name: name, detail: detail }, opts || {});
   }
 
-  // counter: その拍を読んだうえで、このタグを持つ手を先に打っておくと封じられる。
-  // どの拍にも対策があるので、周期を読めば全ての手順に出番が生まれる
+  // guard の拍は守りが固く、こちらの手がまったく通らない（＝読み間違えるとダメージ0）。
+  // sync の拍は無防備で、叩けば3倍。それ以外の拍は普通に通る。
   const PATTERNS = {
-    // 中継ノード・α。護衛の量産機が同期して動く。4拍で1周
+    // 中継ノード・α／β、rc境界。4拍で1周
     guard_sync: [
-      beat("一斉射撃", "護衛機が同時に撃ってくる", { attack: 10, counter: "block", counterName: "射線を封鎖" }),
-      beat("防壁再構成", "削られた面を建て直す", { repair: 10, counter: "grasp", counterName: "再構成の手順を掌握" }),
-      beat("割り込み書き換え", "生活系統へ手を伸ばす", { civilian: true, counter: "protection", counterName: "生活側を保護" }),
+      beat("一斉射撃", "護衛機が同時に撃ってくる", { attack: 10 }),
+      beat("防壁再構成", "全機が壁を建て直す。硬い", { repair: 10, guard: true }),
+      beat("割り込み書き換え", "生活系統へ手を伸ばす", { civilian: true }),
       beat("同期", "全機が指令を取り直す——無防備になる", { sync: true })
     ],
-    // 粗い継ぎ接ぎのEXノード。周期が短く隙も多いが、そのぶん火力が高い
+    // 粗い継ぎ接ぎのEX系。3拍と短く隙も早いが、火力が高い
     rough_sync: [
-      beat("掃射", "狙いも粗いまま撃ってくる", { attack: 13, counter: "block", counterName: "射線を封鎖" }),
+      beat("掃射", "狙いも粗いまま撃ってくる", { attack: 13 }),
       beat("同期", "継ぎ接ぎの指令が揃う——無防備になる", { sync: true }),
-      beat("再構成", "同じ壁を、同じ場所に建て直す", { repair: 8, counter: "grasp", counterName: "再構成の手順を掌握" })
+      beat("再構成", "同じ壁を、同じ場所に建て直す。硬い", { repair: 8, guard: true })
     ],
-    // 中枢級。5拍と長く、隙が深い位置にある。読み切らないと届かない
+    // 中枢級。5拍と長く、守りの拍が2つある
     core_sync: [
-      beat("最終同期", "統一の処理を先へ進める", { progress: 12, counter: "listening", counterName: "発信を最後まで聞く" }),
-      beat("防衛判定", "非効率と判定したものを弾く", { attack: 10, counter: "block", counterName: "射線を封鎖" }),
-      beat("割り込み書き換え", "生活系統へ手を伸ばす", { civilian: true, counter: "protection", counterName: "生活側を保護" }),
+      beat("最終同期", "統一の処理を先へ進める", { progress: 12 }),
+      beat("防衛判定", "非効率と判定したものを弾く。硬い", { attack: 10, guard: true }),
+      beat("割り込み書き換え", "生活系統へ手を伸ばす", { civilian: true }),
       beat("演算集中", "全系統が同じ計算に入る——無防備になる", { sync: true }),
-      beat("再配置", "防壁を組み替える", { repair: 10, counter: "grasp", counterName: "組み替えを掌握" })
+      beat("再配置", "防壁を組み替える。硬い", { repair: 10, guard: true })
     ],
-    // 群体（代行機群・無人デモ群）。数で押してくる。隙は早い位置にあるが一瞬で閉じる
+    // 群体（代行機群・無人デモ群）。数で押してくる
     swarm_sync: [
-      beat("一斉展開", "群れが同時に動き出す", { attack: 8, counter: "block", counterName: "射線を封鎖" }),
-      beat("決定の上書き", "市民の決めかけた用事を書き換える", { civilian: true, counter: "protection", counterName: "生活側を保護" }),
+      beat("一斉展開", "群れが同時に動き出す", { attack: 8 }),
+      beat("決定の上書き", "市民の決めかけた用事を書き換える", { civilian: true }),
       beat("群体同期", "全機の指令が一つに揃う——無防備になる", { sync: true }),
-      beat("隊列再編", "崩れた列を組み直す", { repair: 6, counter: "grasp", counterName: "隊列の指令を掌握" })
+      beat("隊列再編", "崩れた列を組み直す。硬い", { repair: 6, guard: true })
     ],
-    // 暴走した凍結網（RAML側の装置）。人は撃たない。ただ、止めた手が勝手に締まり続ける
+    // 暴走した凍結網（RAML側の装置）。人は撃たない。ただ締め続ける
     frozen_loop: [
-      beat("例外承認の拒否", "解除の申請を、片端から弾いていく", { civilian: true, counter: "protection", counterName: "生活側を保護" }),
-      beat("過剰照合", "止める理由を、自分で足していく", { repair: 12, counter: "grasp", counterName: "照合の手順を掌握" }),
+      beat("例外承認の拒否", "解除の申請を、片端から弾いていく", { civilian: true }),
+      beat("過剰照合", "止める理由を、自分で足していく。硬い", { repair: 12, guard: true }),
       beat("演算の谷", "自問が一巡し、判定が空になる——無防備になる", { sync: true })
     ],
-    // 最終同期の先導役。攻撃してこない。ただひたすら前へ進める＝時間との戦い
+    // 最終同期の先導役。攻撃してこない。ひたすら前へ進める
     vanguard_sync: [
-      beat("同期加速", "先導路の処理を一気に前へ送る", { progress: 15, counter: "listening", counterName: "発信を最後まで聞く" }),
-      beat("前進", "淡々と次の区画へ進む", { progress: 10, counter: "grasp", counterName: "進路の指令を掌握" }),
+      beat("同期加速", "先導路の処理を一気に前へ送る", { progress: 15 }),
+      beat("前進", "淡々と次の区画へ進む。取りつく島がない", { progress: 10, guard: true }),
       beat("演算切替", "先導の計算が切り替わる——無防備になる", { sync: true })
     ]
   };
@@ -108,185 +108,97 @@
 
   // 正典スキル23種（chapter01/03 §2・§3・補助コマンド／chapter02/03 §3／chapter03/03 §3）。
   // node_control は掌握系（SK-FR-02 / SK-FR-07 / SK-CO-C2-02 / SK-FR-C3-01 / SK-OD-C3-01）でのみ積む
+  // 手順は「選べば必ず相手を削る」ものだけに絞る（つる裁定 2026-07-31）。
+  // 補助専用の手（封鎖・開示・無効化など）は理解の負荷が高いわりに手応えが無いため外した。
+  // 例外はレントンのトリアージのみ＝隊を立て直す回復。
   const ACTIONS = {
-    // ---- 秩序系 7種 ----
-    "SK-OD-01": {
-      id: "SK-OD-01", name: "プロトコル封鎖", user: "リコ",
-      detail: "進行を1ターン停止する。割り込み書き換えを防げば市民保護扱い",
-      // 正典（chapter01/03 §2）: 割り込み書き換えを封鎖で防げば市民保護扱い＝protection も兼ねる
-      effect: "freeze_progress", effectStrong: { key: "order_insight", value: 25 },
-      tags: ["order", "block", "protection"],
-      line: sp("リコ", "そこは通さない。手順どおりに、確実に")
-    },
-    "SK-OD-02": {
-      id: "SK-OD-02", name: "ラインキープ", user: "レントン",
-      detail: "このターンの市民被害イベントを無効化する。市民保護扱い",
-      effect: "shield_civilian", effectStrong: { key: "order_insight", value: 40 },
-      gains: [fx("order_insight", 5)], tags: ["order", "protection"],
-      line: sp("レントン", "この線から先は、生活側や。入れん")
-    },
+    // ---- ショウ：大火力。完全性を削る ----
     "SK-OD-03": {
       id: "SK-OD-03", name: "フィジカルブレイク", user: "ショウ",
-      detail: "完全性を大きく下げる（destroyタグ行動）",
+      detail: "正面から叩いて完全性を大きく削る",
       integrity: -30, tags: ["physical"],
       line: sp("ショウ", "……加減は、する")
     },
     "SK-OD-03-A": {
       id: "SK-OD-03-A", name: "加減", user: "ショウ",
-      detail: "威力を落として叩く。波及被害を出さない",
+      detail: "威力を落として削る。波及被害を出さない",
       integrity: -15, tags: ["tempered"],
       requires: { key: "trust_exp", value: 15 },
       line: sp("ショウ", "……こっちは、加減だ。言われたとおりに")
     },
-    "SK-OD-04": {
-      id: "SK-OD-04", name: "ルールリーディング", user: "ノリ",
-      detail: "敵の次の行動を開示する",
-      effect: "reveal", effectStrong: { key: "order_insight", value: 40 },
-      requires: { key: "order_insight", value: 15 }, tags: ["order", "read"],
-      line: sp("ノリ", "次の一手、読めました。——手順どおりに来ます")
-    },
-    "SK-OD-05": {
-      id: "SK-OD-05", name: "トリアージ", user: "レントン",
-      detail: "RAML士気を大きく回復する",
-      morale: 15, requires: { key: "order_insight", value: 20 }, tags: ["order", "care"],
-      line: sp("レントン", "先に、手が要る人からや。——回すで")
-    },
-    "SK-OD-06": {
-      id: "SK-OD-06", name: "秩序規範", user: "リコ",
-      detail: "2ターンのあいだ、全行動の士気コストを半減する",
-      effect: "morale_cost_half", requires: { key: "order_insight", value: 35 }, tags: ["order"],
-      line: sp("リコ", "手順を敷く。——消耗を、抑えて回す")
-    },
-    "SK-OD-07": {
-      id: "SK-OD-07", name: "審判の笛", user: "ノリ",
-      detail: "敵の割り込み書き換えを1回無効にする",
-      effect: "block_rewrite",
-      requiresAll: [{ key: "order_insight", value: 30 }, { key: "trust_exp", value: 15 }],
-      tags: ["order", "block"],
-      line: sp("ノリ", "そこは反則です。——一度、止めます")
-    },
-    // ---- 自由系 7種 ----
-    "SK-FR-01": {
-      id: "SK-FR-01", name: "傾聴プロトコル", user: "全員",
-      detail: "発信を遮らず最後まで聞く（進行が+5進むリスクを負う）",
-      progress: 5, gains: [fx("gadget_analysis", 3), fx("freedom_insight", 3)], tags: ["listening"],
-      line: stg("敵の思想ブロードキャストを、遮らずに最後まで流す"),
-      lineByChapter: { 4: sp("レントン", "まだ、聞くとこあるやろ。——最後まで、な") }
-    },
-    "SK-FR-02": {
-      id: "SK-FR-02", name: "β版の隙", user: "ノリ",
-      detail: "まだ書かれていない場所を突き、制御を進める",
-      control: 20, tags: ["grasp"],
-      requiresAll: [{ key: "freedom_insight", value: 15 }, { key: "gadget_analysis", value: 30 }],
-      exemptIn: ["BT-01"], // EV-BT1-TUT により初戦のみ解放条件免除（chapter01/03 §3）
-      line: sp("ノリ", "ここ、まだ書かれてません。——通ります")
-    },
-    "SK-FR-03": {
-      id: "SK-FR-03", name: "仕様質問", user: "リコ／ノリ",
-      detail: "相手の行動1回を「解説」に変えさせる",
-      effect: "explain", gains: [fx("freedom_insight", 3)], tags: ["listening", "ask"],
-      requires: { key: "freedom_insight", value: 20 }, battleOnly: "BT-03",
-      line: sp("リコ", "仕様を聞かせて。——そこ、どういう判定？")
-    },
-    "SK-FR-04": {
-      id: "SK-FR-04", name: "逆手最適化", user: "リコ",
-      detail: "相手の最適化を利用して市民を先回りで退避させる",
-      effect: "halve_civilian", tags: ["grasp", "protection"],
-      requiresAll: [{ key: "freedom_insight", value: 20 }, { key: "ai_mastery", value: 20 }],
-      line: sp("リコ", "同じ最適化で、先に人を逃がす。——使わせてもらう")
-    },
-    "SK-FR-05": {
-      id: "SK-FR-05", name: "バグ指摘", user: "ノリ",
-      detail: "相手が自己修正に没頭し、2ターン行動を止める",
-      effect: "enemy_stop", effectTurns: 2, tags: ["ask"],
-      requiresAll: [{ key: "freedom_insight", value: 25 }, { key: "gadget_analysis", value: 45 }],
-      line: sp("ノリ", "ここ、再現します。……直したくなりましたか？")
-    },
-    "SK-FR-06": {
-      id: "SK-FR-06", name: "デモ見学", user: "全員",
-      detail: "ツールの実演を見て図鑑を回収する（進行が+10進むリスク）",
-      progress: 10, effect: "dex", gains: [fx("gadget_analysis", 3)], tags: ["listening"],
-      requires: { key: "freedom_insight", value: 25 }, battleOnly: "BT-03",
-      line: sp("ノリ", "実演、見せてもらいます。……勉強になります、本当に")
-    },
-    "SK-FR-07": {
-      id: "SK-FR-07", name: "開放条項", user: "リコ",
-      detail: "止めない。ただし手綱はこちらにも握らせる（このターンの敵行動を止める）",
-      control: 25, effect: "enemy_stop", effectTurns: 1, requiresBalance: true, tags: ["clause", "grasp"],
-      line: sp("リコ", "止めない。ただし——手綱は、こちらにも握らせてもらう")
-    },
-    // ---- 補助コマンド ----
-    "SK-AN-01": {
-      id: "SK-AN-01", name: "解析", user: "ノリ",
-      detail: "戦況の大局を読む。相手の行動パターンが1段ずつ見えてくる",
-      effect: "analyze_pattern",
-      gains: [fx("gadget_analysis", 6), fx("ai_mastery", 2)], tags: ["analysis"],
-      line: sp("ノリ", "読めてきた。……この設計、こちらの手にも馴染む"),
-      lineByChapter: { 4: sp("ノリ", "読めてます。……この規格、癖はいつもと同じです") }
-    },
-    // 原作 comic 4P: レントンはゲーマーの目で現場のパターンを読む。
-    // ノリの大局分析（構造を暴く）に対して、こちらは「次の一手」を確定させる現場の目
-    "SK-AN-03": {
-      id: "SK-AN-03", name: "パターン読み", user: "レントン",
-      detail: "相手の周期を現場で読み、次の一手を確定させる",
-      effect: "read_pattern", gains: [fx("gadget_analysis", 3)], tags: ["analysis", "read"],
-      line: sp("レントン", "動きに癖があるわ。……ゲームも戦場も、パターン解析すれば勝てるんよ")
-    },
-    "SK-AN-02": {
-      id: "SK-AN-02", name: "差分解析", user: "全員",
-      detail: "本家との差分から、削られた場所（急所）を開示する",
-      effect: "expose_weak", gains: [fx("gadget_analysis", 6), fx("ai_mastery", 2)],
-      tags: ["analysis"], fromChapter: 2,
-      line: sp("ノリ", "本家と突き合わせます。……削られた場所、見えました")
-    },
-    "SK-CO-01": {
-      id: "SK-CO-01", name: "采配連携", user: "リコ＋任意",
-      detail: "同一ターンに追加の行動枠を1つ得る（各戦1回）",
-      effect: "extra_slot", once: true, gains: [fx("trust_exp", 3)], tags: ["coordination"],
-      requires: { key: "trust_exp", value: 10 },
-      line: sp("リコ", "合わせて。——今！")
-    },
     "SK-CO-02": {
       id: "SK-CO-02", name: "支えと突破", user: "ショウ＋レントン",
-      detail: "destroyタグなしで完全性を下げる（制圧扱い）",
+      detail: "二人がかりで押し込む。壊さずに完全性を削る",
       integrity: -20, gains: [fx("trust_exp", 3)], tags: ["coordination", "tempered"],
       requires: { key: "trust_exp", value: 15 },
       line: sp("レントン", "息、合わせるで。——支えるほうは、任せとき")
     },
-    "SK-CO-03": {
-      id: "SK-CO-03", name: "読みと笛", user: "ノリ＋リコ",
-      detail: "行動開示と割り込み無効を同時に行う",
-      effect: "read_and_block", gains: [fx("trust_exp", 3)], tags: ["coordination", "read"],
-      requires: { key: "trust_exp", value: 20 },
-      line: sp("ノリ", "読みます。——リコさん、笛を")
+    // ---- ノリ：解析と掌握。制御を積む ----
+    "SK-AN-01": {
+      id: "SK-AN-01", name: "解析", user: "ノリ",
+      detail: "構造を読んで制御を進める。相手の周期も1拍ぶん見えてくる",
+      control: 12, effect: "analyze_pattern",
+      gains: [fx("gadget_analysis", 6), fx("ai_mastery", 2)], tags: ["analysis", "grasp"],
+      line: sp("ノリ", "読めてきた。……この設計、こちらの手にも馴染む"),
+      lineByChapter: { 4: sp("ノリ", "読めてます。……この規格、癖はいつもと同じです") }
     },
-    "SK-CO-C2-01": {
-      id: "SK-CO-C2-01", name: "意思確認、再送", user: "リコ＋レントン",
-      detail: "宙に浮いた決定を本人へ返し、その場で1件解消する",
-      effect: "resolve_collateral", gains: [fx("order_insight", 3), fx("trust_exp", 3)],
-      tags: ["coordination", "protection"], fromChapter: 2,
-      requires: { key: "trust_exp", value: 20 },
-      lines: [
-        sp("リコ", "本人に、確認を再送。手順どおりに"),
-        sp("レントン", "——『本当に、いいですか』。……返事は本人のもんや。待とう")
-      ]
+    "SK-FR-02": {
+      id: "SK-FR-02", name: "β版の隙", user: "ノリ",
+      detail: "まだ書かれていない場所を突いて、制御を大きく進める",
+      control: 20, tags: ["grasp"],
+      requiresAll: [{ key: "freedom_insight", value: 15 }, { key: "gadget_analysis", value: 30 }],
+      exemptIn: ["BT-01"],
+      line: sp("ノリ", "ここ、まだ書かれてません。——通ります")
     },
-    "SK-CO-C2-02": {
-      id: "SK-CO-C2-02", name: "読み筋の圧", user: "ノリ＋ショウ",
-      detail: "急所を開示済みの相手に、制御を進めつつ進行を1ターン止める",
-      control: 15, effect: "freeze_progress", gains: [fx("trust_exp", 3)],
-      tags: ["coordination", "grasp"], fromChapter: 2,
-      requires: { key: "trust_exp", value: 25 }, requiresWeak: true,
-      lines: [
-        sp("ノリ", "急所、開示済み。ショウさん、加減して"),
-        sp("ショウ", "ん")
-      ]
+    "SK-FR-05": {
+      id: "SK-FR-05", name: "バグ指摘", user: "ノリ",
+      detail: "再現手順を突きつける。相手が自己修正に入り、完全性が落ちる",
+      integrity: -20, gains: [fx("gadget_analysis", 3)], tags: ["ask"],
+      requiresAll: [{ key: "freedom_insight", value: 25 }, { key: "gadget_analysis", value: 45 }],
+      line: sp("ノリ", "ここ、再現します。……直したくなりましたか？")
     },
+    // ---- レントン：現場の読みと、隊の立て直し ----
+    "SK-AN-03": {
+      id: "SK-AN-03", name: "パターン読み", user: "レントン",
+      detail: "相手の周期を一息に読み切る。ついでに制御も進む",
+      control: 10, effect: "read_pattern", gains: [fx("gadget_analysis", 3)], tags: ["analysis", "read"],
+      line: sp("レントン", "動きに癖があるわ。……ゲームも戦場も、パターン解析すれば勝てるんよ")
+    },
+    "SK-OD-05": {
+      id: "SK-OD-05", name: "トリアージ", user: "レントン",
+      detail: "手当てをして隊を立て直す。RAML士気が回復する（唯一の回復手）",
+      morale: 15, gains: [fx("order_insight", 3)], tags: ["order", "care"],
+      line: sp("レントン", "先に、手が要る人からや。——回すで")
+    },
+    // ---- リコ：采配。制御を押さえる ----
+    "SK-CO-01": {
+      id: "SK-CO-01", name: "采配連携", user: "リコ＋任意",
+      detail: "二人で押さえて制御を進める。この戦闘の行動枠が1つ増える（1回だけ）",
+      control: 15, effect: "extra_slot", once: true, gains: [fx("trust_exp", 3)], tags: ["coordination", "grasp"],
+      requires: { key: "trust_exp", value: 10 },
+      line: sp("リコ", "合わせて。——今！")
+    },
+    "SK-FR-07": {
+      id: "SK-FR-07", name: "開放条項", user: "リコ",
+      detail: "止めない。ただし手綱はこちらが握る。制御を大きく進める",
+      control: 25, requiresBalance: true, tags: ["clause", "grasp"],
+      line: sp("リコ", "止めない。ただし——手綱は、こちらにも握らせてもらう")
+    },
+    // ---- 全員 ----
+    "SK-FR-01": {
+      id: "SK-FR-01", name: "傾聴プロトコル", user: "全員",
+      detail: "発信を遮らず最後まで聞く。理解が進み、制御も少し進む（進行は+5される）",
+      control: 8, progress: 5,
+      gains: [fx("gadget_analysis", 3), fx("freedom_insight", 3)], tags: ["listening", "grasp"],
+      line: stg("敵の思想ブロードキャストを、遮らずに最後まで流す"),
+      lineByChapter: { 4: sp("レントン", "まだ、聞くとこあるやろ。——最後まで、な") }
+    },
+    // ---- 第3章の核（BT-C3-02 専用） ----
     "SK-OD-C3-01": {
       id: "SK-OD-C3-01", name: "再開の笛", user: "リコ",
-      detail: "凍結した系統の条件を緩めて鎮静化する（守りの空白を出さない）",
+      detail: "凍結した系統の条件を緩めて鎮める。制御が進む",
       control: 20, gains: [fx("freedom_insight", 3), fx("order_insight", 3)],
-      battleOnly: "BT-C3-02", tags: ["restart"],
+      battleOnly: "BT-C3-02", tags: ["restart", "grasp"],
       lines: [
         sp("リコ", "この系統、条件を緩める。——凍結、解除。止めっぱなしには、しない"),
         sp("ノリ", "再開手順、通します。……止めた笛を、もう一度")

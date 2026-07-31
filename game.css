@@ -551,10 +551,13 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 .beat-unknown { color: rgba(255,255,255,.28); }
 .beat-next { color: var(--ink); border-color: var(--cyan); background: rgba(80,228,210,.1); }
 .beat-sync { color: var(--amber); border-color: rgba(244,189,98,.6); background: rgba(244,189,98,.1); }
+.beat-guard { color: #9fb6bd; border-color: rgba(160,190,200,.45); background: rgba(160,190,200,.08); }
 @keyframes gap-pulse { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
 .pattern-advice { margin-top: 9px; padding-top: 8px; border-top: 1px dashed var(--line); color: var(--muted); font-size: 12px; line-height: 1.6; }
 .pattern-advice strong { color: var(--cyan); }
 .pattern-advice.sync strong { color: var(--amber); }
+.pattern-advice.guard strong { color: #9fb6bd; }
+.pattern-head strong.gap-shut { color: #0b1a1e; background: #9fb6bd; padding: 2px 8px; font-size: 12px; }
 
 .battle-log {
   max-height: 176px;

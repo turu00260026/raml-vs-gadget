@@ -59,12 +59,12 @@
   // 章内称号26種（各章 03/04 §8-1）。シリーズ通し称号 TCS-01〜04 とは別枠
   const CHAPTER_TITLES = [
     { id: "TTL-01", chapter: 1, name: "壊さぬ制圧者", detail: "全3戦を destroy タグなしで解決" },
-    { id: "TTL-02", chapter: 1, name: "市民生活の守護者", detail: "市民被害イベント発生0" },
+    { id: "TTL-02", chapter: 1, name: "市民生活の守護者", detail: "全3戦で、生活側に被害が出る前（進行100の手前）に決着させた" },
     { id: "TTL-03", chapter: 1, name: "傾聴者", detail: "思想ブロードキャスト・口上（D1含む）をすべて最後まで聞く" },
     { id: "TTL-04", chapter: 1, name: "全対処", detail: "解決タグ付き決着3回" },
     { id: "TTL-05", chapter: 1, name: "不撤退", detail: "retreated 0件" },
     { id: "TTL-06", chapter: 1, name: "手綱を握る者", detail: "開放条項を使用" },
-    { id: "TTL-07", chapter: 1, name: "読み切り", detail: "ルールリーディングで開示した敵行動をすべて無効化" },
+    { id: "TTL-07", chapter: 1, name: "読み切り", detail: "全3戦で、守りの固い拍に一度も手を無駄打ちしなかった" },
     { id: "TTL-08", chapter: 1, name: "β愛好家", detail: "GADGETツール図鑑コンプリート" },
     { id: "TTL-09", chapter: 1, name: "現場の人", detail: "サブイベント4本全回収" },
     { id: "TTL-10", chapter: 1, name: "静かな怪力", detail: "完全性削りを「加減」と連携のみで達成" },
@@ -92,8 +92,8 @@
     { id: "DEX-TOOL-01", category: "tools", chapter: 1, name: "AUTONOMY本体", battle: "BT-03", requires: "analysis" },
     { id: "DEX-TOOL-02", category: "tools", chapter: 1, name: "中継ノード・α", battle: "BT-01", requires: "analysis" },
     { id: "DEX-TOOL-03", category: "tools", chapter: 1, name: "中継ノード・β", battle: "BT-02", requires: "analysis" },
-    { id: "DEX-TOOL-04", category: "tools", chapter: 1, name: "ケイスケ自作ツール（試作）", battle: "BT-03", requires: "demo" },
-    { id: "DEX-TOOL-05", category: "tools", chapter: 1, name: "ケイスケ自作ツール（常用）", battle: "BT-03", requires: "demo" },
+    { id: "DEX-TOOL-04", category: "tools", chapter: 1, name: "ケイスケ自作ツール（試作）", battle: "BT-03", requires: "analysis" },
+    { id: "DEX-TOOL-05", category: "tools", chapter: 1, name: "ケイスケ自作ツール（常用）", battle: "BT-03", requires: "analysis" },
     { id: "DEX-TOOL-06", category: "tools", chapter: 3, name: "Ver.1.0-rc中枢", battle: "BT-C3-03", requires: "analysis" },
     { id: "DEX-TOOL-07", category: "tools", chapter: 3, name: "rc境界防衛機構", battle: "BT-C3-01", requires: "analysis" },
     // 回収自体は解析系行動。OFFER R2 を選んだ場合のみ「退区項目が存在しない」詳細註記が付く（chapter03/03 §4-2）
@@ -104,8 +104,8 @@
     { id: "DEX-FORK-01", category: "forks", chapter: 2, name: "DELEGATE-EX中枢", battle: "BT-C2-03", requires: "analysis" },
     { id: "DEX-FORK-02", category: "forks", chapter: 2, name: "EXノード改変体", battle: "BT-C2-01", requires: "analysis" },
     { id: "DEX-FORK-03", category: "forks", chapter: 2, name: "市街代行機", battle: "BT-C2-02", requires: "analysis" },
-    { id: "DEX-FORK-04", category: "forks", chapter: 2, name: "フォークのフォーク（亜種）", battle: "BT-C2-03", requires: "diff" },
-    { id: "DEX-FORK-05", category: "forks", chapter: 2, name: "削られた意思確認コード", battle: "BT-C2-01", requires: "diff" }
+    { id: "DEX-FORK-04", category: "forks", chapter: 2, name: "フォークのフォーク（亜種）", battle: "BT-C2-03", requires: "analysis" },
+    { id: "DEX-FORK-05", category: "forks", chapter: 2, name: "削られた意思確認コード", battle: "BT-C2-01", requires: "analysis" }
   ];
 
   const DEX_CATEGORY_LABELS = { tools: "GADGETツール図鑑", forks: "野良フォーク", noise: "noise_log断片", ending: "END回収" };
@@ -189,6 +189,8 @@
             civilian_damage: Math.max(0, Number(record.civilian_damage) || 0),
             civilian_resolved: Math.max(0, Number(record.civilian_resolved) || 0),
             civilian_events: Math.max(0, Number(record.civilian_events) || 0),
+            wasted: Math.max(0, Number(record.wasted) || 0),
+            progress_damage: Boolean(record.progress_damage),
             reveal_count: Math.max(0, Number(record.reveal_count) || 0),
             block_count: Math.max(0, Number(record.block_count) || 0),
             offer_count: Math.max(0, Number(record.offer_count) || 0),
@@ -348,13 +350,13 @@
 
     return {
       "TTL-01": noDestroy(CHAPTER_BATTLES[1]),
-      "TTL-02": c1.length === 3 && c1.every(function (r) { return r.civilian_events === 0 && r.civilian_damage === 0; }),
+      "TTL-02": c1.length === 3 && c1.every(function (r) { return r.progress_damage !== true && r.civilian_damage === 0; }),
       "TTL-03": heardAll(CHAPTER_BATTLES[1]) && d1("BT-03"),
       "TTL-04": settled(1),
       "TTL-05": noRetreat(1),
       "TTL-06": CHAPTER_BATTLES[1].some(function (id) { return usedSkill(id, "SK-FR-07"); }),
-      "TTL-07": c1.length === 3 && c1.some(function (r) { return r.reveal_count > 0; }) &&
-        c1.every(function (r) { return r.block_count >= r.reveal_count; }),
+      // 守りの拍で空振りしなかった＝周期を読んで手を通し続けた証拠
+      "TTL-07": c1.length === 3 && c1.every(function (r) { return r.wasted === 0; }),
       // 第1章時点のGADGETツール図鑑5点（rc系・第4章分は後続章の追加なので対象外）
       "TTL-08": dexComplete(dexOf("tools", 1)),
       "TTL-09": ["SUB-01", "SUB-02", "SUB-03", "SUB-04"].every(function (id) { return subs.indexOf(id) >= 0; }),

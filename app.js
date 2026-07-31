@@ -425,8 +425,8 @@
       ["ゲージ4つの意味", "<strong>RAML士気</strong>＝隊の余力。0になるとその場は撤退します（物語は続きます）。<br><strong>完全性</strong>＝機械の頑丈さ。0まで下げると「物理停止」が選べます。<br><strong>制御</strong>＝掌握の度合い。100まで進めると「制御奪取」が選べます。<br><strong>進行</strong>＝相手の最適化の進み具合。100に達すると生活側に被害が出ます（敗北ではありません）。"],
       ["1ターンの流れ", "行動枠は<strong>1ターンに2つ</strong>。2つ使うと相手の手番になります。ターン上限を過ぎると規定の決着になります（残り2ターンで警告が出ます）。"],
       ["相手には周期がある", "この戦闘のいちばん大事なところです。<br><strong>相手は決まった順番で動いています。</strong>画面の「相手の周期」に、その順番が並びます。<br>読めていない拍は<strong>？</strong>のままです。<strong>解析</strong>を打つと1拍ずつ開いて、次に何が来るかが見えます。"],
-      ["同期のラグを突く", "周期の中に<strong>★同期</strong>があります。全機が指令を取り直す一瞬で、ここだけ<strong>無防備</strong>になります。<br><strong>同期している間、相手は硬い。</strong>力任せに殴っても15%しか通りません。連打では絶対に削り切れません。<br>ですが<strong>隙を突いた一撃は3倍</strong>で通ります。——ただし<strong>隙は、読めていた者にしか見えません</strong>。"],
-      ["読んで、構える", "次の一手が読めていれば、それを<strong>先に潰す手</strong>を打てます。刺されば相手の一手は<strong>丸ごと不発</strong>になります。<br><strong>一斉射撃</strong>→封鎖系で射線を切る／<strong>防壁再構成</strong>→掌握系で手順を奪う／<strong>割り込み書き換え</strong>→保護系で生活側を守る。<br>何で潰せるかは、周期表示の下に出ます。"],
+      ["3種類の拍がある", "周期の拍は3種類です。<br><strong>ふつうの拍</strong>＝手はそのまま通ります。<br><strong>🛡守りの拍</strong>＝<strong>何を出しても通りません</strong>（ダメージ0）。読み違えるとここで空振りします。<br><strong>★同期の拍</strong>＝無防備。<strong>どの手でも3倍</strong>で通ります。"],
+      ["だから、読む", "周期が読めていれば、<strong>守りの拍は避けて、同期の拍に叩き込む</strong>ことができます。<br>守りの拍では、<strong>レントンのトリアージ</strong>で立て直したり、解析で先を読んだりするのが得策です。<br>読まずに殴っても進みますが、空振りと被弾のぶん遠回りになります。"],
       ["手順の選び方は2段階", "まず<strong>誰が動くか</strong>を選び、次に<strong>その人の手</strong>を選びます。<br>隊員ごとに得意が違います。<strong>リコ</strong>＝采配と封鎖／<strong>ノリ</strong>＝解析と読み／<strong>レントン</strong>＝現場の癖を読む・生活を守る／<strong>ショウ</strong>＝大火力。<br>1手打つと、また隊員選びに戻ります。<strong>その場にいない隊員は出てきません</strong>（レントンは第1章の初戦と第2章の初戦では別行動です）。<br>条件を満たしていない手順は下に畳んであり、開くと「何を伸ばせば使えるか」が読めます。"],
       ["決着のしかた", "<strong>完全性を0まで下げれば物理停止、制御を100まで進めれば制御奪取</strong>で、その場で決着します。<br>章が進むと<strong>対話</strong>や<strong>抑え込み</strong>も加わります。こちらは条件を満たすと画面下のボタンから選べます。<br>壊して止めるか、掌握して止めるか、話して止めるか——ここが、この作品の選択です。"]
     ];
@@ -606,13 +606,18 @@
       const classes = ["beat"];
       if (rel === 0) classes.push("beat-next");
       if (visible && step.sync) classes.push("beat-sync");
+      if (visible && step.guard) classes.push("beat-guard");
       if (!visible) classes.push("beat-unknown");
-      const label = visible ? (step.sync ? "★" + step.name : step.name) : "？";
+      const label = visible
+        ? (step.sync ? "★" + step.name : (step.guard ? "🛡" + step.name : step.name))
+        : "？";
       return '<span class="' + classes.join(" ") + '" title="' + escapeHTML(visible ? step.detail : "未解析") + '">' +
         (rel === 0 ? "▶" : "") + escapeHTML(label) + "</span>";
     }).join("");
-    const state = battleState.vulnerable
-      ? '<strong class="gap-open">いま隙。叩けば3倍で通る</strong>'
+    const state = battleState.guarded
+      ? '<strong class="gap-shut">いまは守りが固い。手は通らない</strong>'
+      : battleState.vulnerable
+      ? '<strong class="gap-open">いま隙。どの手でも3倍</strong>'
       : (known >= pattern.length ? "<span>周期は読み切った</span>" : "<span>周期 " + known + " / " + pattern.length + " を解析</span>");
     // 次の一手が読めているなら、それを潰す手を教える（拍ごとに正解が変わる）
     const upcoming = Engine.nextBeat(battleDefinition, battleState);
@@ -620,10 +625,10 @@
     let advice = "";
     if (read && upcoming) {
       advice = upcoming.sync
-        ? '<div class="pattern-advice sync">次は隙。<strong>削る手・掌握する手</strong>を叩き込むと3倍で通る</div>'
-        : (upcoming.counter
-          ? '<div class="pattern-advice">先に<strong>' + escapeHTML(upcoming.counterName) + "</strong>できる手を打てば、この一手は不発にできる</div>"
-          : "");
+        ? '<div class="pattern-advice sync">次は<strong>隙</strong>。どの手でも<strong>3倍</strong>で通る</div>'
+        : (upcoming.guard
+          ? '<div class="pattern-advice guard">次は<strong>守りが固い</strong>。手を出しても通らない——<strong>トリアージ</strong>や解析に回すとき</div>'
+          : '<div class="pattern-advice">次は普通に通る</div>');
     }
     return '<div class="pattern-strip"><div class="pattern-head">相手の周期　' + state + "</div>" +
       '<div class="pattern-beats">' + cells + "</div>" + advice + "</div>";
