@@ -29,6 +29,7 @@
   let endingLines = [];
   let endingVariant = null;
   let endingStored = null;
+  let selectedActor = null;
   let currentScene = null;
   let settings = loadSettings();
 
@@ -426,7 +427,7 @@
       ["相手には周期がある", "この戦闘のいちばん大事なところです。<br><strong>相手は決まった順番で動いています。</strong>画面の「相手の周期」に、その順番が並びます。<br>読めていない拍は<strong>？</strong>のままです。<strong>解析</strong>を打つと1拍ずつ開いて、次に何が来るかが見えます。"],
       ["同期のラグを突く", "周期の中に<strong>★同期</strong>があります。全機が指令を取り直す一瞬で、ここだけ<strong>無防備</strong>になります。<br><strong>同期している間、相手は硬い。</strong>力任せに殴っても15%しか通りません。連打では絶対に削り切れません。<br>ですが<strong>隙を突いた一撃は3倍</strong>で通ります。——ただし<strong>隙は、読めていた者にしか見えません</strong>。"],
       ["読んで、構える", "次の一手が読めていれば、それを<strong>先に潰す手</strong>を打てます。刺されば相手の一手は<strong>丸ごと不発</strong>になります。<br><strong>一斉射撃</strong>→封鎖系で射線を切る／<strong>防壁再構成</strong>→掌握系で手順を奪う／<strong>割り込み書き換え</strong>→保護系で生活側を守る。<br>何で潰せるかは、周期表示の下に出ます。"],
-      ["手順（コマンド）", "<strong>いま押せる手順だけ</strong>が並びます。条件を満たしていないものは下に畳んであり、開くと「何を伸ばせば使えるか」が読めます。<br>手順には<strong>使う人</strong>が書いてあります。<strong>その場にいない隊員の手は選べません</strong>（レントンは第1章の初戦と第2章の初戦では別行動です）。"],
+      ["手順の選び方は2段階", "まず<strong>誰が動くか</strong>を選び、次に<strong>その人の手</strong>を選びます。<br>隊員ごとに得意が違います。<strong>リコ</strong>＝采配と封鎖／<strong>ノリ</strong>＝解析と読み／<strong>レントン</strong>＝現場の癖を読む・生活を守る／<strong>ショウ</strong>＝大火力。<br>1手打つと、また隊員選びに戻ります。<strong>その場にいない隊員は出てきません</strong>（レントンは第1章の初戦と第2章の初戦では別行動です）。<br>条件を満たしていない手順は下に畳んであり、開くと「何を伸ばせば使えるか」が読めます。"],
       ["決着のしかた", "<strong>完全性を0まで下げれば物理停止、制御を100まで進めれば制御奪取</strong>で、その場で決着します。<br>章が進むと<strong>対話</strong>や<strong>抑え込み</strong>も加わります。こちらは条件を満たすと画面下のボタンから選べます。<br>壊して止めるか、掌握して止めるか、話して止めるか——ここが、この作品の選択です。"]
     ];
     infoKicker.textContent = "TUTORIAL / BT-01";
@@ -442,6 +443,8 @@
   }
 
   function startBattle(battleId) {
+    selectedActor = null;
+    prevGauges = null;
     battleDefinition = Battles.getBattle(battleId);
     battleState = Engine.createBattleState(battleDefinition, gameState.params);
     if (battleId === "BT-01") {
@@ -515,22 +518,53 @@
     }).join("") + "</div>";
   }
 
+  // その手順を出す隊員。「ショウ＋レントン」は主体のショウ、「リコ／ノリ」は両方に出す
+  function actorsOf(action) {
+    if (!action.user || action.user === "全員") return ["全員"];
+    return action.user.split("＋")[0].split("／");
+  }
+
+  const ACTOR_ORDER = ["リコ", "ノリ", "レントン", "ショウ", "全員"];
+
   function battleActionButtons() {
-    // いま押せる手順だけを並べる。条件未達のものは畳んでおく（毎回23個並ぶと選べない）
-    const usable = [];
+    // ドラクエ式の2段階選択。まず誰が動くかを選び、次にその人の手を選ぶ。
+    // 一度に20個並ぶと選びきれないため
+    const groups = {};
     const locked = [];
     Battles.actionIdsForBattle(battleDefinition).forEach(function (id) {
       const action = Battles.actions[id];
       const availability = Engine.actionAvailable(battleDefinition, battleState, gameState.params, action);
-      const name = action.user ? action.name + "（" + action.user + "）" : action.name;
       if (availability.ok) {
-        usable.push('<button class="command-button" data-action="' + escapeHTML(id) + '"><strong>' +
-          escapeHTML(name) + "</strong><small>" + escapeHTML(action.detail) + "</small></button>");
+        actorsOf(action).forEach(function (who) {
+          if (!groups[who]) groups[who] = [];
+          groups[who].push({ id: id, action: action });
+        });
       } else if (availability.reason !== "敵フェイズへ移行中") {
-        locked.push('<li>' + escapeHTML(name) + "　<span>" + escapeHTML(availability.reason) + "</span></li>");
+        locked.push('<li>' + escapeHTML(action.name) +
+          (action.user ? "（" + escapeHTML(action.user) + "）" : "") +
+          "　<span>" + escapeHTML(availability.reason) + "</span></li>");
       }
     });
-    let markup = '<div class="command-grid">' + dialogueButtons() + usable.join("") + "</div>";
+
+    let markup;
+    if (!selectedActor || !groups[selectedActor]) {
+      // 第1段階：誰が動くか
+      const actors = ACTOR_ORDER.filter(function (who) { return groups[who] && groups[who].length; });
+      markup = '<p class="command-step">誰が動く？</p><div class="actor-grid">' +
+        dialogueButtons() +
+        actors.map(function (who) {
+          return '<button class="actor-button" data-actor="' + escapeHTML(who) + '"><strong>' +
+            escapeHTML(who) + "</strong><small>手順 " + groups[who].length + "</small></button>";
+        }).join("") + "</div>";
+    } else {
+      // 第2段階：その人の手
+      markup = '<p class="command-step"><button class="link-button" id="actor-back">← 隊員を選び直す</button>' +
+        '<span class="command-actor">' + escapeHTML(selectedActor) + "</span></p>" +
+        '<div class="command-grid">' + groups[selectedActor].map(function (entry) {
+          return '<button class="command-button" data-action="' + escapeHTML(entry.id) + '"><strong>' +
+            escapeHTML(entry.action.name) + "</strong><small>" + escapeHTML(entry.action.detail) + "</small></button>";
+        }).join("") + "</div>";
+    }
     if (locked.length) {
       markup += '<details class="locked-skills"><summary>まだ使えない手順　' + locked.length +
         "件</summary><ul>" + locked.join("") + "</ul></details>";
@@ -680,6 +714,14 @@
     const helpButton = document.getElementById("battle-help");
     if (helpButton) helpButton.addEventListener("click", showBattleTutorial);
 
+    screen.querySelectorAll("[data-actor]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        selectedActor = button.dataset.actor;
+        renderBattle();
+      });
+    });
+    const actorBack = document.getElementById("actor-back");
+    if (actorBack) actorBack.addEventListener("click", function () { selectedActor = null; renderBattle(); });
     screen.querySelectorAll("[data-action]").forEach(function (button) {
       button.addEventListener("click", function () {
         const snap = {
@@ -692,6 +734,7 @@
         const result = Engine.performAction(battleDefinition, battleState, gameState.params, button.dataset.action);
         if (!result.ok) { toast(result.reason); return; }
         buildFeedback(snap, result);
+        selectedActor = null; // 1手ごとに隊員選択へ戻る
         battleState = result.local;
         gameState.params = result.params;
         checkBattleState();

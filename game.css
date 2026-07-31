@@ -502,6 +502,28 @@ button:focus-visible, select:focus-visible, input:focus-visible {
   border-left: 3px solid var(--amber);
   font-size: 13px;
 }
+/* 誰が動くか → その人の手、の2段階選択 */
+.command-step {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin: 16px 0 10px;
+  color: var(--muted); font: 700 13px/1.4 var(--font-ui, inherit); letter-spacing: .04em;
+}
+.command-actor { color: var(--cyan); font-size: 15px; font-weight: 800; }
+.actor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 9px; }
+.actor-button {
+  display: grid; gap: 4px; padding: 15px 12px;
+  text-align: left; color: var(--ink);
+  background: rgba(80, 228, 210, .07);
+  border: 1px solid rgba(80, 228, 210, .3);
+  border-left: 3px solid var(--cyan);
+  cursor: pointer;
+  transition: background .15s ease, transform .1s ease;
+}
+.actor-button:hover { background: rgba(80, 228, 210, .14); }
+.actor-button:active { transform: translateY(1px); }
+.actor-button strong { font-size: 17px; }
+.actor-button small { color: var(--muted); font-size: 11px; }
+
 .locked-skills { margin-top: 10px; color: var(--muted); font-size: 12px; }
 .locked-skills summary { cursor: pointer; padding: 6px 0; }
 .locked-skills ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; }
