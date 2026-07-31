@@ -50,7 +50,26 @@
     ["ed_c3_bad_01", "event_cg", "cutins/ed_c3_bad_01.webp"],
     ["ed_c3_normal_01", "event_cg", "cutins/ed_c3_normal_01.webp"],
     ["ed_c3_true_01", "event_cg", "cutins/ed_c3_true_01.webp"],
-    ["ed_c4_normal_01", "event_cg", "cutins/ed_c4_normal_01.webp"]
+    ["ed_c4_normal_01", "event_cg", "cutins/ed_c4_normal_01.webp"],
+
+    // 第2〜4章の専用素材（2026-07-31 納品）。中枢は章ごとに造形が変わる
+    ["frozen_system_active", "enemy", "enemies/frozen_system_active.png"],
+    ["frozen_system_released", "enemy", "enemies/frozen_system_released.png"],
+    ["rc_barrier_active", "enemy", "enemies/rc_barrier_active.png"],
+    ["rc_core_active", "enemy", "enemies/rc_core_active.png"],
+    ["rc_core_standby", "enemy", "enemies/rc_core_standby.png"],
+    ["bg_rc_district", "background", "backgrounds/bg_rc_district.webp"],
+    ["bg_rc_boundary", "background", "backgrounds/bg_rc_boundary.webp"],
+    ["bg_frozen_command", "background", "backgrounds/bg_frozen_command.webp"],
+    ["node_beta_stopped", "enemy", "enemies/node_beta_stopped.png"],
+    ["ex_node_active", "enemy", "enemies/ex_node_active.png"],
+    ["ex_core_active", "enemy", "enemies/ex_core_active.png"],
+    ["ex_core_standby", "enemy", "enemies/ex_core_standby.png"],
+    ["crowd_drones_active", "enemy", "enemies/crowd_drones_active.png"],
+    ["crowd_drones_suppressed", "enemy", "enemies/crowd_drones_suppressed.png"],
+    ["ver1_core_active", "enemy", "enemies/ver1_core_active.png"],
+    ["ver1_core_standby", "enemy", "enemies/ver1_core_standby.png"],
+    ["bg_final_core_hall", "background", "backgrounds/bg_final_core_hall.webp"]
   ].map(function (row) {
     return { id: row[0], type: row[1], file: row[2], status: "approved" };
   });

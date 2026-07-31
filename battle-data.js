@@ -261,7 +261,7 @@
     },
     "BT-02": {
       id: "BT-02", chapter: 1, scene: "SC-07", title: "中継ノード・β",
-      target: "中継ノード・β", background: "bg_hospital_courtyard", asset: "node_beta_active",
+      target: "中継ノード・β", background: "bg_hospital_courtyard", asset: "node_beta_active", assetResolved: "node_beta_stopped",
       turnLimit: 8, resolutions: ["destroy", "control", "dialogue", "avoid"], timeout: "avoid",
       // 院内系統と直結した、丁寧すぎる守り
       pattern: "guard_sync",
@@ -400,7 +400,7 @@
     },
     "BT-C2-01": {
       id: "BT-C2-01", chapter: 2, scene: "SC-C2-04", title: "EXノード",
-      target: "EXノード", background: "bg_warehouse_node", asset: "node_alpha_active", assetResolved: "node_alpha_stopped",
+      target: "EXノード", background: "bg_warehouse_node", asset: "ex_node_active",
       turnLimit: 8, resolutions: ["destroy", "control"], timeout: "destroy",
       // 02_scenario.md SC-C2-04 の登場人物。レントンは別現場（SC-C2-06）
       absent: ["レントン"],
@@ -446,7 +446,7 @@
     },
     "BT-C2-02": {
       id: "BT-C2-02", chapter: 2, scene: "SC-C2-07", title: "市街の代行機群",
-      target: "代行機群", background: "bg_city_crossing_dusk", asset: "ryousan_clean", assetResolved: "ryousan_suppressed",
+      target: "代行機群", background: "bg_city_crossing_dusk", asset: "crowd_drones_active", assetResolved: "crowd_drones_suppressed",
       turnLimit: 8, resolutions: ["destroy", "control", "dialogue", "avoid"], timeout: "avoid",
       collateralOnPhysical: true, collateralName: "宙に浮いた決定",
       offer: {
@@ -507,7 +507,7 @@
     },
     "BT-C2-03": {
       id: "BT-C2-03", chapter: 2, scene: "SC-C2-08", title: "EX中枢",
-      target: "EX中枢", background: "bg_old_server_room", asset: "autonomy_core_active", assetResolved: "autonomy_core_standby",
+      target: "EX中枢", background: "bg_old_server_room", asset: "ex_core_active", assetResolved: "ex_core_standby",
       turnLimit: 10, resolutions: ["destroy", "control", "dialogue"], timeout: "retreated",
       finalBattle: true, controlGA: 60, dialogueGA: 68, requireClause: false,
       // EX中枢も本家より粗い。周期は短い
@@ -588,7 +588,7 @@
     },
     "BT-C3-01": {
       id: "BT-C3-01", chapter: 3, scene: "SC-C3-04", title: "rc境界防衛機構",
-      target: "rc境界防衛機構", background: "bg_warehouse_node", asset: "node_beta_active",
+      target: "rc境界防衛機構", background: "bg_rc_boundary", asset: "rc_barrier_active",
       turnLimit: 8, resolutions: ["destroy", "control", "avoid"], timeout: "avoid",
       collateralOnPhysical: true, collateralName: "波及した生活処理",
       offer: {
@@ -642,7 +642,7 @@
     },
     "BT-C3-02": {
       id: "BT-C3-02", chapter: 3, scene: "SC-C3-06", title: "凍結システム暴走",
-      target: "凍結システム", background: "bg_raml_command", asset: null,
+      target: "凍結システム", background: "bg_frozen_command", asset: "frozen_system_active", assetResolved: "frozen_system_released",
       turnLimit: 8, resolutions: ["destroy", "control"], timeout: "destroy",
       collateralOnPhysical: true, collateralName: "守りの空白",
       restartOnlyControl: true,
@@ -683,7 +683,7 @@
     },
     "BT-C3-03": {
       id: "BT-C3-03", chapter: 3, scene: "SC-C3-08", title: "rc中枢",
-      target: "rc中枢", background: "bg_old_server_room", asset: "autonomy_core_active", assetResolved: "autonomy_core_standby",
+      target: "rc中枢", background: "bg_old_server_room", asset: "rc_core_active", assetResolved: "rc_core_standby",
       turnLimit: 10, resolutions: ["destroy", "control", "dialogue"], timeout: "retreated",
       finalBattle: true, controlGA: 72, dialogueGA: 80, requireClause: true,
       // 中枢級
@@ -748,7 +748,7 @@
     },
     "BT-C4-01": {
       id: "BT-C4-01", chapter: 4, scene: "SC-C4-03", title: "最終同期先行ノード",
-      target: "先行ノード", background: "bg_warehouse_node", asset: "node_alpha_active", assetResolved: "node_alpha_stopped",
+      target: "先行ノード", background: "bg_warehouse_node", asset: "ex_node_active",
       turnLimit: 8, resolutions: ["destroy", "control", "avoid"], timeout: "avoid",
       // 先導役。攻撃せず、ひたすら前へ
       pattern: "vanguard_sync",
@@ -782,7 +782,7 @@
     },
     "BT-C4-02": {
       id: "BT-C4-02", chapter: 4, scene: "SC-C4-05", title: "三万人の無人デモ群",
-      target: "無人デモ群", background: "bg_cityhall_night", asset: "ryousan_clean", assetResolved: "ryousan_suppressed",
+      target: "無人デモ群", background: "bg_cityhall_night", asset: "crowd_drones_active", assetResolved: "crowd_drones_suppressed",
       turnLimit: 8, resolutions: ["destroy", "control", "avoid"], timeout: "avoid",
       collateralOnPhysical: true, collateralName: "宙に浮いた処理",
       // 無人の群体
@@ -830,7 +830,7 @@
     },
     "BT-C4-03": {
       id: "BT-C4-03", chapter: 4, scene: "SC-C4-07", title: "Ver.1.0中枢",
-      target: "Ver.1.0中枢", background: "bg_old_server_room", asset: "autonomy_core_active", assetResolved: "autonomy_core_standby",
+      target: "Ver.1.0中枢", background: "bg_final_core_hall", asset: "ver1_core_active", assetResolved: "ver1_core_standby",
       turnLimit: 10, resolutions: ["destroy", "control", "dialogue"], timeout: "retreated",
       finalBattle: true, controlGA: 78, dialogueGA: 85, requireClause: true,
       // 最終同期の中枢

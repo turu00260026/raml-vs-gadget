@@ -632,7 +632,7 @@
       ]
     },
     "SC-C3-03": {
-      id: "SC-C3-03", chapter: 3, title: "快適な檻", background: "bg_cityhall_night",
+      id: "SC-C3-03", chapter: 3, title: "快適な檻", background: "bg_rc_district",
       lines: [
         stage("rc地区の入口。手続きゼロで境界をくぐる。音が柔らかい。待ち時間がない。誰も急いでいない"),
         line("レントン", "（内心）……音が、やわらかいわ。誰も、急いどらん", "renton", "analysis"),
@@ -667,7 +667,7 @@
       ]
     },
     "SC-C3-04": {
-      id: "SC-C3-04", chapter: 3, title: "善意の壁", background: "bg_warehouse_node",
+      id: "SC-C3-04", chapter: 3, title: "善意の壁", background: "bg_rc_boundary",
       lines: [
         stage("rc境界。RAMLの前で境界が閉じている。境界の外に立つ市民"),
         line("市民", "中に母がいるんです。連絡はつくし、元気だとも言う。……でも、会いに行ったら、私も出られなくなるんでしょう？"),
@@ -677,7 +677,7 @@
       battle: "BT-C3-01"
     },
     "SC-C3-05": {
-      id: "SC-C3-05", chapter: 3, title: "あなたたちも、縛る側だ", background: "bg_cityhall_night",
+      id: "SC-C3-05", chapter: 3, title: "あなたたちも、縛る側だ", background: "bg_rc_boundary",
       lines: [
         stage("rc境界の外。凍結への抗議の人垣"),
         line("市民", "あなたたちも、縛る側だ"),
@@ -706,7 +706,7 @@
       ]
     },
     "SC-C3-06": {
-      id: "SC-C3-06", chapter: 3, title: "正しさの暴走", background: "bg_raml_command",
+      id: "SC-C3-06", chapter: 3, title: "正しさの暴走", background: "bg_frozen_command",
       lines: [
         stage("司令室〜凍結網の管理領域。凍結システムが例外承認を無視し、再凍結を続けている"),
         line("リコ", "……うちの正しさが、暴走してる。止めるよ。——自分の手で", "rico", "alert")
@@ -946,7 +946,7 @@
       ]
     },
     "SC-C4-07": {
-      id: "SC-C4-07", chapter: 4, title: "統一のリリース", background: "bg_old_server_room",
+      id: "SC-C4-07", chapter: 4, title: "統一のリリース", background: "bg_final_core_hall",
       lines: [
         stage("Ver.1.0中枢。統一の同期が、ここから世界へ放たれようとしている。ケイスケが中枢の傍らに立つ"),
         line("ケイスケ", "……三度目か。今日は、止めに来たのか。それとも、世界を見に来たのか", "keisuke", "serious")
@@ -954,7 +954,7 @@
       battle: "BT-C4-03"
     },
     "SC-C4-08": {
-      id: "SC-C4-08", chapter: 4, title: "ED-FINAL", background: "bg_old_server_room", type: "ending",
+      id: "SC-C4-08", chapter: 4, title: "ED-FINAL", background: "bg_final_core_hall", type: "ending",
       // 予兆2箇所目（裁定0）: ED立ち上がりで統一されたUI群の一画面だけが化けて、次カットで戻る
       prelude: "世界のUIが、一斉に切り替わる。——その一瞬、統一された画面のうち一つだけが、まるで別の作品のような絵柄に化けて、すぐに元へ戻る。誰も気づかない。",
       variants: {
