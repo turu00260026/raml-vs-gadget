@@ -173,7 +173,7 @@
     // ---- リコ：采配。制御を押さえる ----
     "SK-CO-01": {
       id: "SK-CO-01", name: "采配連携", user: "リコ＋任意",
-      detail: "二人で押さえて制御を進める。この戦闘の行動枠が1つ増える（1回だけ）",
+      detail: "二人で押さえて制御を進める。この行動枠が1つ増える（1回だけ）",
       control: 15, effect: "extra_slot", once: true, gains: [fx("trust_exp", 3)], tags: ["coordination", "grasp"],
       requires: { key: "trust_exp", value: 10 },
       line: sp("リコ", "合わせて。——今！")

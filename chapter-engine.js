@@ -215,7 +215,7 @@
     if (action.fromChapter && definition.chapter < action.fromChapter) {
       return { ok: false, reason: "この章ではまだ使えません" };
     }
-    if (action.battleOnly && action.battleOnly !== definition.id) return { ok: false, reason: "この戦闘では使用できません" };
+    if (action.battleOnly && action.battleOnly !== definition.id) return { ok: false, reason: "この対処では使用できません" };
     // その場にいない隊員の手順は選べない（02_scenario.md の登場人物に従う）
     if (definition.absent && definition.absent.length) {
       const missing = BATTLES.requiredMembers(action).filter(function (name) {

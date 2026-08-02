@@ -274,7 +274,7 @@
     let interaction = "";
     if (finished && pendingLines) {
       interaction = scene.battle
-        ? '<button class="primary-button" id="start-battle">戦闘を開始</button>'
+        ? '<button class="primary-button" id="start-battle">対処を開始</button>'
         : '<button class="primary-button" id="next-scene">次へ</button>';
     } else if (finished && scene.choice) {
       interaction = '<div class="choice-list" aria-label="' + escapeHTML(scene.choice.prompt) + '">' +
@@ -283,7 +283,7 @@
             '<span class="choice-code">' + escapeHTML(item.id) + '</span><span>' + escapeHTML(item.text) + '</span></button>';
         }).join("") + "</div>";
     } else if (finished && scene.battle) {
-      interaction = '<button class="primary-button" id="start-battle">戦闘を開始</button>';
+      interaction = '<button class="primary-button" id="start-battle">対処を開始</button>';
     } else if (finished) {
       interaction = '<button class="primary-button" id="next-scene">' +
         (scene.id === "SC-C4-10" ? "記録室へ" : "次へ") + "</button>";
@@ -478,10 +478,10 @@
 
   function showBattleTutorial() {
     const rows = [
-      ["この戦闘で決めること", "「どちらが強いか」ではありません。<strong>この機械をどう止めるか</strong>を選びます。選んだ止め方は記録に残り、章の結末に効いてきます。"],
+      ["この対処で決めること", "「どちらが強いか」ではありません。<strong>この機械をどう止めるか</strong>を選びます。選んだ止め方は記録に残り、章の結末に効いてきます。"],
       ["ゲージ4つの意味", "<strong>RAML士気</strong>＝隊の余力。0になるとその場は撤退します（物語は続きます）。<br><strong>完全性</strong>＝機械の頑丈さ。0まで下げると「物理停止」が選べます。<br><strong>制御</strong>＝掌握の度合い。100まで進めると「制御奪取」が選べます。<br><strong>進行</strong>＝相手の最適化の進み具合。100に達すると生活側に被害が出ます（敗北ではありません）。"],
       ["1ターンの流れ", "行動枠は<strong>1ターンに2つ</strong>。2つ使うと相手の手番になります。ターン上限を過ぎると規定の決着になります（残り2ターンで警告が出ます）。"],
-      ["相手には周期がある", "この戦闘のいちばん大事なところです。<br><strong>相手は決まった順番で動いています。</strong>画面の「相手の周期」に、その順番が並びます。<br>読めていない拍は<strong>？</strong>のままです。<strong>解析</strong>を打つと1拍ずつ開いて、次に何が来るかが見えます。"],
+      ["相手には周期がある", "この対処のいちばん大事なところです。<br><strong>相手は決まった順番で動いています。</strong>画面の「相手の周期」に、その順番が並びます。<br>読めていない拍は<strong>？</strong>のままです。<strong>解析</strong>を打つと1拍ずつ開いて、次に何が来るかが見えます。"],
       ["3種類の拍がある", "周期の拍は3種類です。<br><strong>ふつうの拍</strong>＝手はそのまま通ります。<br><strong>🛡守りの拍</strong>＝<strong>何を出しても通りません</strong>（ダメージ0）。読み違えるとここで空振りします。<br><strong>★同期の拍</strong>＝無防備。<strong>どの手でも3倍</strong>で通ります。"],
       ["だから、読む", "周期が読めていれば、<strong>守りの拍は避けて、同期の拍に叩き込む</strong>ことができます。<br>守りの拍では、<strong>レントンのトリアージ</strong>で立て直したり、解析で先を読んだりするのが得策です。<br>読まずに殴っても進みますが、空振りと被弾のぶん遠回りになります。"],
       ["手順の選び方は2段階", "まず<strong>誰が動くか</strong>を選び、次に<strong>その人の手</strong>を選びます。<br>隊員ごとに得意が違います。<strong>リコ</strong>＝采配と封鎖／<strong>ノリ</strong>＝解析と読み／<strong>レントン</strong>＝現場の癖を読む・生活を守る／<strong>ショウ</strong>＝大火力。<br>1手打つと、また隊員選びに戻ります。<strong>その場にいない隊員は出てきません</strong>（レントンは第1章の初戦と第2章の初戦では別行動です）。<br>条件を満たしていない手順は下に畳んであり、開くと「何を伸ばせば使えるか」が読めます。"],
@@ -886,7 +886,7 @@
       : "";
     screen.innerHTML =
       '<section class="result-screen"><article class="result-card">' +
-        '<p class="eyebrow">BATTLE RECORD / ' + escapeHTML(record.battle_id) + "</p>" +
+        '<p class="eyebrow">OPERATION RECORD / ' + escapeHTML(record.battle_id) + "</p>" +
         resolvedArt +
         "<h1>" + escapeHTML(label) + "</h1>" +
         (timedOut ? '<p class="phase-strip">ターン上限時の規定により確定</p>' : "") +
@@ -1010,7 +1010,7 @@
           '<section class="archive-panel wide"><h2>noise_log断片</h2><ul class="archive-list">' + noiseItems + "</ul>" +
             '<div class="release-note"><strong>未分類の物語構造</strong><br>' +
               escapeHTML(complete ? Series.noiseComplete : "断片の解析は未完成") + "</div></section>" +
-          '<section class="archive-panel wide"><h2>戦闘ログ</h2><ul class="archive-list">' +
+          '<section class="archive-panel wide"><h2>対処ログ</h2><ul class="archive-list">' +
             (state.battle_records.length ? state.battle_records.map(function (record) {
               const label = record.retreated ? Battles.resolutionLabels.retreated : Battles.resolutionLabels[record.resolution];
               return '<li class="archive-item unlocked">' + escapeHTML(record.battle_id) + " ／ " +
@@ -1024,13 +1024,13 @@
   }
 
   document.getElementById("home-button").addEventListener("click", function () {
-    if (viewMode === "battle" && !window.confirm("戦闘の途中です。シーン頭からやり直してタイトルへ戻りますか？")) return;
-    if (viewMode === "result" && !window.confirm("戦闘結果を確認中です。タイトルへ戻りますか？（この戦闘は決着済みとして扱われます）")) return;
+    if (viewMode === "battle" && !window.confirm("対処の途中です。場面の頭からやり直してタイトルへ戻りますか？")) return;
+    if (viewMode === "result" && !window.confirm("対処の結果を確認中です。タイトルへ戻りますか？（この対処は決着済みとして扱われます）")) return;
     showTitle();
   });
   document.getElementById("analysis-button").addEventListener("click", showAnalysis);
   document.getElementById("records-button").addEventListener("click", function () {
-    if (viewMode === "battle" && !window.confirm("戦闘の途中です。記録室へ移ると、この戦闘はシーン頭からやり直しになります。移動しますか？")) return;
+    if (viewMode === "battle" && !window.confirm("対処の途中です。記録室へ移ると、この対処は場面の頭からやり直しになります。移動しますか？")) return;
     showRecords();
   });
   document.getElementById("settings-button").addEventListener("click", function () { settingsModal.showModal(); });
