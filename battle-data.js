@@ -400,7 +400,7 @@
     },
     "BT-C2-01": {
       id: "BT-C2-01", chapter: 2, scene: "SC-C2-04", title: "EXノード",
-      target: "EXノード", background: "bg_warehouse_node", asset: "ex_node_active",
+      target: "EXノード", background: "bg_warehouse_node", asset: "ex_node_active", assetResolved: "ex_node_stopped", assetResolved: "ex_node_stopped",
       turnLimit: 8, resolutions: ["destroy", "control"], timeout: "destroy",
       // 02_scenario.md SC-C2-04 の登場人物。レントンは別現場（SC-C2-06）
       absent: ["レントン"],
@@ -588,7 +588,7 @@
     },
     "BT-C3-01": {
       id: "BT-C3-01", chapter: 3, scene: "SC-C3-04", title: "rc境界防衛機構",
-      target: "rc境界防衛機構", background: "bg_rc_boundary", asset: "rc_barrier_active",
+      target: "rc境界防衛機構", background: "bg_rc_boundary", asset: "rc_barrier_active", assetResolved: "rc_barrier_open", assetResolved: "rc_barrier_open",
       turnLimit: 8, resolutions: ["destroy", "control", "avoid"], timeout: "avoid",
       collateralOnPhysical: true, collateralName: "波及した生活処理",
       offer: {
@@ -748,7 +748,7 @@
     },
     "BT-C4-01": {
       id: "BT-C4-01", chapter: 4, scene: "SC-C4-03", title: "最終同期先行ノード",
-      target: "先行ノード", background: "bg_warehouse_node", asset: "ex_node_active",
+      target: "先行ノード", background: "bg_warehouse_node", asset: "ex_node_active", assetResolved: "ex_node_stopped", assetResolved: "ex_node_stopped",
       turnLimit: 8, resolutions: ["destroy", "control", "avoid"], timeout: "avoid",
       // 先導役。攻撃せず、ひたすら前へ
       pattern: "vanguard_sync",
