@@ -269,7 +269,11 @@
       renderAdv();
       return;
     }
-    const sceneArt = backgroundStyle(scene.background);
+    // 背景欄にイベントCG（人物入り）が指定されている場面は、カットインと同じ扱いにする。
+    // イベントCGは別に描くので、下地は無地にしておく
+    const bgEntry = scene.background ? Assets.byId[scene.background] : null;
+    const bgIsEventCg = Boolean(bgEntry && bgEntry.type === "event_cg");
+    const sceneArt = backgroundStyle(bgIsEventCg ? null : scene.background);
 
     let interaction = "";
     if (finished && pendingLines) {
@@ -290,8 +294,13 @@
     }
 
     const isStage = Boolean(line && line.stage);
-    const cutin = (!finished && line && line.cutin && Assets.assetPath(line.cutin))
-      ? '<img class="scene-cutin" src="' + escapeHTML(Assets.assetPath(line.cutin)) + '" alt="" data-target>'
+    // 絵は切り抜かずに収める。余った縁は同じ絵をぼかして敷いて埋める（端末差で人物が欠けないように）
+    const cutinPath = (!finished && line && line.cutin)
+      ? Assets.assetPath(line.cutin)
+      : (bgIsEventCg ? Assets.assetPath(scene.background) : null);
+    const cutin = cutinPath
+      ? '<img class="scene-cutin-bed" src="' + escapeHTML(cutinPath) + '" alt="" aria-hidden="true">' +
+        '<img class="scene-cutin" src="' + escapeHTML(cutinPath) + '" alt="" data-target>'
       : "";
     const speakerText = finished
       ? (pendingLines ? scene.title : (scene.choice ? scene.choice.prompt : scene.title))
