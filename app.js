@@ -225,6 +225,37 @@
   // 表示中の行。選択肢を選んだ後は ▼差分＋合流後の行に切り替わる
   function activeLines() { return (pendingLines || currentScene.lines).filter(lineVisible); }
 
+  // ▼ 文字送り。設定の「速い」と「視覚効果を減らす」では一括表示にする
+  const TYPE_INTERVAL = { fast: 0, normal: 28, slow: 60 };
+  let typeTimer = null;
+  let typeTarget = null;
+  let typeFull = "";
+
+  function typingActive() { return typeTimer !== null; }
+
+  function finishTyping() {
+    if (typeTimer === null) return;
+    clearInterval(typeTimer);
+    typeTimer = null;
+    if (typeTarget) typeTarget.textContent = typeFull;
+    typeTarget = null;
+  }
+
+  function startTyping(element, text) {
+    finishTyping();
+    const step = settings.reduced ? 0 : (TYPE_INTERVAL[settings.speed] || 0);
+    if (!element || !step || !text) return;
+    typeTarget = element;
+    typeFull = text;
+    element.textContent = "";
+    let index = 0;
+    typeTimer = setInterval(function () {
+      index += 1;
+      element.textContent = text.slice(0, index);
+      if (index >= text.length) finishTyping();
+    }, step);
+  }
+
   function renderAdv() {
     viewMode = "adv";
     const scene = currentScene;
@@ -285,6 +316,7 @@
 
     wireImageFallbacks();
     if (!finished) {
+      startTyping(screen.querySelector(".dialogue-text"), bodyText);
       document.getElementById("dialogue-panel").addEventListener("click", advanceLine);
     } else if (pendingLines) {
       if (scene.battle) {
